@@ -11,7 +11,7 @@
 		"MediaWiki": ">= 1.34.0"
 	},
 	"AutoloadNamespaces": {
-		"MediaWiki\\Extension\\WikiToLDAP": "includes/"
+		"MediaWiki\\Extension\\WikiToLDAP\\": "includes/"
 	},
 	"Hooks": {
 		"PostLoginRedirect":

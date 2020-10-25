@@ -32,20 +32,23 @@ if ( $IP === false ) {
 }
 require "$IP/maintenance/Maintenance.php";
 
+$maintClass = MoveToMigrationGroup::class;
 class MoveToMigrationGroup extends Maintenance {
 	private /** @var Config */ $config;
 	private /** @var string */ $group;
 
 	public function __construct() {
 		parent::__construct();
-		$this->config = Config::newInstance();
-		$this->group = $this->config->get( Config::LDAP_MIGRATION_GROP );
+
 		$this->addDescription(
-			"Put all users in the LDAPMigration group ($group)"
+			"Put all users in the LDAPMigration group."
 		);
 	}
 
 	public function execute() {
+		$this->config = Config::newInstance();
+		$this->group = $this->config->get( Config::LDAP_MIGRATION_GROUP );
+
 		foreach ( $this->getUsers() as $user ) {
 			$this->moveToMigrationGroup( $user );
 		}
@@ -62,13 +65,12 @@ class MoveToMigrationGroup extends Maintenance {
 	protected function moveToMigrationGroup( User $user ) :void {
 		$groups = $user->getGroups();
 		if ( ! in_array( $this->group, $groups ) ) {
-			$this->output( "Adding $user to $group... " );
+			$this->output( "Adding $user to {$this->group}... " );
 			$user->addGroup( $this->group );
 			$this->output( "done\n" );
+		} else {
+			$this->output( "$user is already in {$this->group}.\n" );
 		}
 	}
 }
-
-$maintClass = MoveToMigrationGroup::class;
-
 require_once RUN_MAINTENANCE_IF_MAIN;

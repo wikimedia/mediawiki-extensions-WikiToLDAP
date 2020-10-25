@@ -1,11 +1,11 @@
 <?php
 
-namespace MediaWiki\Extension\BoilerPlate\Tests;
+namespace MediaWiki\Extension\WikiToLDAP\Tests;
 
-use MediaWiki\Extension\BoilerPlate\Hooks;
+use MediaWiki\Extension\WikiToLDAP\Hooks;
 
 /**
- * @coversDefaultClass \MediaWiki\Extension\BoilerPlate\Hooks
+ * @coversDefaultClass \MediaWiki\Extension\WikiToLDAP\Hooks
  */
 class HooksTest extends \MediaWikiUnitTestCase {
 
@@ -14,7 +14,7 @@ class HooksTest extends \MediaWikiUnitTestCase {
 	 */
 	public function testOnBeforePageDisplayVandalizeIsTrue() {
 		$config = new \HashConfig( [
-			'BoilerPlateVandalizeEachPage' => true
+			'WikiToLDAPVandalizeEachPage' => true
 		] );
 		$outputPageMock = $this->getMockBuilder( \OutputPage::class )
 			->disableOriginalConstructor()
@@ -24,7 +24,7 @@ class HooksTest extends \MediaWikiUnitTestCase {
 
 		$outputPageMock->expects( $this->once() )
 			->method( 'addHTML' )
-			->with( '<p>BoilerPlate was here</p>' );
+			->with( '<p>WikiToLDAP was here</p>' );
 		$outputPageMock->expects( $this->once() )
 			->method( 'addModules' )
 			->with( 'oojs-ui-core' );
@@ -41,7 +41,7 @@ class HooksTest extends \MediaWikiUnitTestCase {
 	 */
 	public function testOnBeforePageDisplayVandalizeFalse() {
 		$config = new \HashConfig( [
-			'BoilerPlateVandalizeEachPage' => false
+			'WikiToLDAPVandalizeEachPage' => false
 		] );
 		$outputPageMock = $this->getMockBuilder( \OutputPage::class )
 			->disableOriginalConstructor()

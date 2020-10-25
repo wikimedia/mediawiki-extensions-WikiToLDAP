@@ -1,10 +1,10 @@
 ( function () {
 
 	/**
-	 * @class mw.boilerPlate
+	 * @class mw.wikiToLDAP
 	 * @singleton
 	 */
-	mw.boilerPlate = {
+	mw.wikiToLDAP = {
 	};
 
 }() );

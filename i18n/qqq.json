@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Your Name"
+			"Mark A. Hershberger"
 		]
 	},
-	"boilerplate-desc": "{{desc|name=Boilerplate|url=https://www.mediawiki.org/wiki/Extension:Boilerplate}}"
+	"wikitoldap-desc": "{{desc|name=Wikitoldap|url=https://www.mediawiki.org/wiki/Extension:Wikitoldap}}"
 }

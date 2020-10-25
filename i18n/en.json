@@ -1,8 +1,8 @@
 {
 	"@metadata": {
 		"authors": [
-			"Your Name"
+			"Mark A. Hershberger"
 		]
 	},
-	"boilerplate-desc": "This is an example extension"
+	"wikitoldap-desc": "Wiki to LDAP account conversion"
 }

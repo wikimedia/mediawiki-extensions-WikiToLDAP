@@ -4,5 +4,6 @@
 			"Mark A. Hershberger"
 		]
 	},
-	"wikitoldap-desc": "{{desc|name=Wikitoldap|url=https://www.mediawiki.org/wiki/Extension:Wikitoldap}}"
+	"wikitoldap-desc": "{{desc|name=Wikitoldap|url=https://www.mediawiki.org/wiki/Extension:Wikitoldap}}",
+	"wikitoldap-group": "a MediaWiki group that users are put into to transition them to LDAP accounts"
 }

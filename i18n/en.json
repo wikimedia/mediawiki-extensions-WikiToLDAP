@@ -4,5 +4,6 @@
 			"Mark A. Hershberger"
 		]
 	},
-	"wikitoldap-desc": "Wiki to LDAP account conversion"
+	"wikitoldap-desc": "Wiki to LDAP account conversion",
+	"wikitoldap-group": "Wiki to LDAP group for account migration"
 }

@@ -5,5 +5,9 @@
 		]
 	},
 	"wikitoldap-desc": "Wiki to LDAP account conversion",
-	"wikitoldap-group": "Wiki to LDAP group for account migration"
+	"wikitoldap-group": "Wiki to LDAP group for account migration",
+
+	"log-name-wiki2ldap": "Wiki to LDAP account conversion",
+	"log-description-wiki2ldap": "These are the users whose accounts have been merged.",
+	"logentry-wiki2ldap-redirect": "$1 {{GENDER:$2|was redirected}} to migrate {{GENDER:$2|his|her|their}} account when accessing $3"
 }

@@ -21,34 +21,12 @@
 
 namespace MediaWiki\Extension\WikiToLDAP;
 
-use ManualLogEntry;
-use MediaWiki\MediaWikiServices;
-use OutputPage;
-use RequestContext;
-use Skin;
-use Title;
-use User;
+use SpecialPage;
 
-class Hook {
-
-	public static function onUserCan(
-		Title $title, User $user, string $action, &$result
-	) {
-		$perm = MediaWikiServices::getInstance()->getPermissionManager();
-		$migrate = Title::makeTitleSafe( NS_SPECIAL, "MigrateUserToLDAP" );
-
-		if (
-			$perm->userHasRight( $user, 'migrate-from-ldap' ) &&
-			$title->getNamespace() !== NS_SPECIAL
-		) {
-			header( "Location: " . $migrate->getFullURL() );
-			$logEntry = new ManualLogEntry( "wiki2ldap", "redirect" );
-			$logEntry->setPerformer( $user );
-			$logEntry->setTarget( $title );
-			$logId = $logEntry->insert();
-			$logEntry->publish($logId);
-			exit;
-		}
-		return true;
+class SpecialMigrateUser extends SpecialPage {
+	public function __construct( $par = "" ) {
+		parent::__construct( "MigrateUserToLDAP" );
+	}
+	public function execute( $par = "" ) {
 	}
 }

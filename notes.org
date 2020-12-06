@@ -1,0 +1,27 @@
+* Redirecting users
+Since there does not appear to be a hook that can be used when permission is denied (i.e. the showPermissionsError function is called), we will use JS to show the error.
+
+This means creating a JS module that will redirect the user when a permissions error would be displayed.
+
+Since we are putting these users in the ldap-migration group, we'll just look for that in the header of the page and redirect when we see it in the config value for wgUserGroups
+
+Of course, this means that the ldap users cannot be in that group.
+
+- FEH
+  I cannot seem to put a redirect in the outputpage context object and get a redirect.  Maybe this is a bug, but, for now, it isn't working.
+
+  As a result, I've fallen back to
+  #+begin_src php
+			header( "Location: " . $migrate->getFullURL() )
+  #+end_src
+  to just force the redirect.  This is ugly.
+
+- FEH 2
+  I was trying to use the $title parameter of the userCan hook to avoid a redirect look but that is not working.
+  Got to find a better hook.
+
+It ended up working, but I'm bailing (=exit()=) after the the redirect
+
+Also, had to whitelist the MigrateUserToLDAP page.o
+* Logging
+Ok, now that is working, I have to get logging working.

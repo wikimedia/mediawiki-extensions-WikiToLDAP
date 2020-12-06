@@ -46,8 +46,7 @@ class MoveToMigrationGroup extends Maintenance {
 	}
 
 	public function execute() {
-		$this->config = Config::newInstance();
-		$this->group = $this->config->get( Config::LDAP_MIGRATION_GROUP );
+		$this->group = 'ldap-migration';
 
 		foreach ( $this->getUsers() as $user ) {
 			$this->moveToMigrationGroup( $user );

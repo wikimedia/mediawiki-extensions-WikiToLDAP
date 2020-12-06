@@ -14,8 +14,8 @@
 		"MediaWiki\\Extension\\WikiToLDAP\\": "includes/"
 	},
 	"Hooks": {
-		"PostLoginRedirect":
-		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPostLoginRedirect"
+		"userCan":
+		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onUserCan"
 	},
 	"MessagesDirs": {
 		"WikiToLDAP": [
@@ -34,13 +34,79 @@
 			"scripts": []
 		}
 	},
-	"config_prefix": "WikiToLDAP",
-	"config": {
-		"LDAPMigrationGroup": {
-			"value": "ldap-migration",
-			"descriptionmsg": "wikitoldap-group",
-			"public": true
+	"SpecialPages": {
+		"MigrateUserToLDAP": "MediaWiki\\Extension\\WikiToLDAP\\SpecialMigrateUser"
+	},
+	"GroupPermissions": {
+		"ldap-migration": {
+			"migrate-from-ldap": true
 		}
 	},
+	"RevokePermissions": {
+		"ldap-migration": {
+			"bigdelete": true,
+			"block": true,
+			"blockemail": true,
+			"browsearchive": true,
+			"confirmaccount": true,
+			"createclass": true,
+			"createpage": true,
+			"createtalk": true,
+			"datatransferimport": true,
+			"delete": true,
+			"deletechangetags": true,
+			"deletechangetags": true,
+			"deletelogentry": true,
+			"deleterevision": true,
+			"edit": true,
+			"editmyoptions": true,
+			"editmywatchlist": true,
+			"editprotected": true,
+			"editsemiprotected": true,
+			"editsitecss": true,
+			"editsiteinterface": true,
+			"editsitejs": true,
+			"editsitejson": true,
+			"editusercss": true,
+			"edituserjs": true,
+			"edituserjson": true,
+			"geocode": true,
+			"hideuser": true,
+			"import": true,
+			"importupload": true,
+			"lookupcredentials": true,
+			"managechangetags": true,
+			"mergehistory": true,
+			"move": true,
+			"move-categorypages": true,
+			"move-rootuserpages": true,
+			"move-subpages": true,
+			"movefile": true,
+			"nuke": true,
+			"protect": true,
+			"read": true,
+			"reupload": true,
+			"smw-admin": true,
+			"suppressionlog": true,
+			"suppressrevision": true,
+			"upload": true,
+			"userrights": true,
+			"viewedittab": true,
+			"viewmyprivateinfo": true,
+			"viewmywatchlist": true,
+			"viewmywatchlist": true,
+			"viewsuppressed": true,
+			"writeapi": true
+		}
+	},
+	"config_prefix": "WikiToLDAP",
+	"config": {
+	},
+
+    "LogTypes": [ "WikiToLDAP" ],
+    "LogActionsHandlers": {
+        "wikiToLDAP/*": "LogFormatter"
+    },
+
 	"manifest_version": 2
 }

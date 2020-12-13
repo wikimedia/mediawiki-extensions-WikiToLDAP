@@ -22,12 +22,18 @@
 namespace MediaWiki\Extension\WikiToLDAP;
 
 use Exception;
-use SpecialPage;
+use FormSpecialPage;
+use HTMLForm;
+use Status;
 
-class Special extends SpecialPage {
+class Special extends FormSpecialPage {
+
+    /** The text of the submit button. */
+	private $submitButton = null;
 
     /**
-     * How this page is accessed.
+     * How this page is accessed ... This is here so we can do static calls
+     * from other classes.
      */
     public const PageName = "MigrateUser";
 
@@ -55,7 +61,7 @@ class Special extends SpecialPage {
 	protected $stepMap = [];
 
 	public function __construct( $par = "" ) {
-		parent::__construct( self::PageName );
+		parent::__construct( self::PageName, 'migrate-from-ldap' );
 		$this->setupStepMap();
 	}
 
@@ -68,6 +74,10 @@ class Special extends SpecialPage {
 
 		return isset( $this->stepMap[$step] );
 	}
+
+    public function getMessagePrefix() {
+        return "wikitoldap";
+    }
 
 	protected function setupStepMap() {
 		foreach( $this->step as $num => $info ) {
@@ -94,26 +104,32 @@ class Special extends SpecialPage {
 		}
 	}
 
-	public function execute( $par = null ) {
-		if ( !$this->isValidStep( $par ) ) {
-			$this->getOutput()->redirect(
-				self::getTitleFor( self::PageName )->getFullURL()
-			);
-			return;
-		}
-		$this->showStep( $par );
-	}
-
-	public function showStep( ?string $step ): void {
+	public function showStep( ?string $step ): array {
         $method = $this->stepMap[$step]['method'];
-        $this->$method();
+        $form = $this->$method();
+        $form['next'] = [
+            "type" => "hidden",
+            "default" => $this->getNextStep( $this->par )
+        ];
+        return $form;
 	}
 
-    public function displayIntro() {
-        $this->getOutput()->addWikiMsg( "" );
+    public function getNextStep( ?string $thisStep ): ?string {
+        $thisStep = $thisStep ?? "";
+        return $this->step[$this->stepMap[$thisStep]['next']]['par'];
     }
 
-    public function selectAccount() {
+    public function displayIntro(): array {
+        return [
+			"message" => [
+				"type" => "info",
+				"label-message" =>  $this->getMessagePrefix() . "-introduction"
+            ]
+		];
+    }
+
+    public function selectAccount(): array {
+        return [];
     }
 
     public function checkAccount() {
@@ -121,4 +137,38 @@ class Special extends SpecialPage {
 
     public function mergeAccount() {
     }
+
+	/**
+	 * Give the parent methods the form
+	 */
+	protected function getFormFields(): array {
+		if ( !$this->isValidStep( $this->par ) ) {
+			$this->getOutput()->redirect(
+				self::getTitleFor( self::PageName )->getFullURL()
+			);
+			return [];
+		}
+		return $this->showStep( $this->par );
+	}
+
+	/**
+	 * Set the submit button to the text desired
+	 */
+	protected function alterForm( HTMLForm $form ): void {
+		if ( $this->submitButton !== null ) {
+			$form->setSubmitTextMsg( $this->submitButton );
+		}
+	}
+
+	/**
+	 * Handle submission.... redirect, etc
+	 */
+	public function onSubmit( array $data ): Status {
+		if ( isset( $data["next"] ) ) {
+			$this->getOutput()->redirect(
+				self::getTitleFor( self::PageName, $data["next"] )->getFullURL( )
+			);
+		}
+		return Status::newGood();
+	}
 }

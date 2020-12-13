@@ -35,7 +35,7 @@
 		}
 	},
 	"SpecialPages": {
-		"MigrateUserToLDAP": "MediaWiki\\Extension\\WikiToLDAP\\SpecialMigrateUser"
+		"MigrateUser": "MediaWiki\\Extension\\WikiToLDAP\\Special"
 	},
 	"GroupPermissions": {
 		"ldap-migration": {
@@ -101,12 +101,16 @@
 	},
 	"config_prefix": "WikiToLDAP",
 	"config": {
+		"MigrationGroup": {
+			"value": "ldap-migration",
+			"public": true,
+			"path": false
+		}
 	},
-
-    "LogTypes": [ "WikiToLDAP" ],
+	"callback": "MediaWiki\\Extension\\WikiToLDAP\\Hook::init",
+    "LogTypes": [ "wikitoldap" ],
     "LogActionsHandlers": {
-        "wikiToLDAP/*": "LogFormatter"
+        "wikitoldap/*": "LogFormatter"
     },
-
 	"manifest_version": 2
 }

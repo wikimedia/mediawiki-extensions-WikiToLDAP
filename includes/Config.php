@@ -23,7 +23,7 @@ use GlobalVarConfig;
 
 class Config extends GlobalVarConfig {
 
-	const LDAP_MIGRATION_GROUP = "LDAPMigrationGroup";
+	const LDAP_MIGRATION_GROUP = "MigrationGroup";
 
 	public function __construct() {
 		parent::__construct( 'WikiToLDAP' );

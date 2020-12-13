@@ -23,5 +23,15 @@ Of course, this means that the ldap users cannot be in that group.
 It ended up working, but I'm bailing (=exit()=) after the the redirect
 
 Also, had to whitelist the MigrateUserToLDAP page.o
+
 * Logging
 Ok, now that is working, I have to get logging working.
+Logging is failing right now with this:
+#+begin_src sh
+PHP Fatal error:  OOUI\\InputWidget cannot use OOUI\\TabIndexedElement - it is not a trait in /var/www/wiki_osgeo/html/w/vendor/oojs/oojs-ui/php/widgets/InputWidget.php on line 11
+#+end_src
+rebuilding to vendor fixed
+* Ok, now, the logs aren't showing up.
+Removing the =exit()= (to allow post display actions?) fixed it.
+* Migrate User
+Page should say “Hey, you need to migrate your account.”

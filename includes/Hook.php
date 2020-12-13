@@ -31,23 +31,35 @@ use User;
 
 class Hook {
 
+	/**
+	 * Handle any initialisation
+	 */
+	public static function init(): void {
+		global $wgWhitelistRead;
+
+		$wgWhitelistRead[] = "Special:" . Special::PageName;
+	}
+
+	/**
+	 * Redirect all users in the migrate-from-ldap group to the migration page
+	 */
 	public static function onUserCan(
 		Title $title, User $user, string $action, &$result
-	) {
+	): bool {
 		$perm = MediaWikiServices::getInstance()->getPermissionManager();
-		$migrate = Title::makeTitleSafe( NS_SPECIAL, "MigrateUserToLDAP" );
+		$migrate = Title::makeTitleSafe( NS_SPECIAL, Special::PageName );
 
 		if (
 			$perm->userHasRight( $user, 'migrate-from-ldap' ) &&
 			$title->getNamespace() !== NS_SPECIAL
 		) {
 			header( "Location: " . $migrate->getFullURL() );
-			$logEntry = new ManualLogEntry( "wiki2ldap", "redirect" );
+
+			$logEntry = new ManualLogEntry( "wikitoldap", "redirect" );
 			$logEntry->setPerformer( $user );
 			$logEntry->setTarget( $title );
 			$logId = $logEntry->insert();
 			$logEntry->publish($logId);
-			exit;
 		}
 		return true;
 	}

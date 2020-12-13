@@ -7,8 +7,6 @@
     xsi:schemaLocation="https://getpsalm.org/schema/config vendor/vimeo/psalm/config.xsd"
 >
     <projectFiles>
-        <directory name="../../maintenance" />
-        <directory name="../../includes" />
         <directory name="maintenance" />
         <directory name="includes" />
         <ignoreFiles>

@@ -17,9 +17,7 @@
 		"userCan":
 		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onUserCan",
 		"PluggableAuthUserAuthorization":
-		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthUserAuthorization",
-		"ApiMain::moduleManager":
-		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onModuleManager"
+		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthUserAuthorization"
 	},
 	"MessagesDirs": {
 		"WikiToLDAP": [
@@ -88,7 +86,6 @@
 			"movefile": true,
 			"nuke": true,
 			"protect": true,
-			"read": true,
 			"reupload": true,
 			"smw-admin": true,
 			"suppressionlog": true,

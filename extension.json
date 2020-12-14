@@ -15,7 +15,11 @@
 	},
 	"Hooks": {
 		"userCan":
-		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onUserCan"
+		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onUserCan",
+		"PluggableAuthUserAuthorization":
+		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthUserAuthorization",
+		"ApiMain::moduleManager":
+		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onModuleManager"
 	},
 	"MessagesDirs": {
 		"WikiToLDAP": [

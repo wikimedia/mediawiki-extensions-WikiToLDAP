@@ -35,3 +35,10 @@ rebuilding to vendor fixed
 Removing the =exit()= (to allow post display actions?) fixed it.
 * Migrate User
 Page should say “Hey, you need to migrate your account.”
+* LDAP user logs in using PluggableAuth
+Have to find a way to mark that user as not in =ldap-migration=.
+
+Looks like the closest I can get right now is the hook =PluggableAuthPopulateGroups= that will tell me someone used PluggableAuth.  For OSGeo right now that can only mean LDAP, I think.
+- Discovered a [[https://phabricator.wikimedia.org/T270056][bug in LDAPAuthentication2]] because it wasn't setting $id and so groups could not be removed on login (which I need if someone logs in with LDAP — that user should not be marked for LDAP migration any more.)
+* Next step on migration, choose a user
+Done.  Had to hack the ability to do API reads even without permission to otherwise read.

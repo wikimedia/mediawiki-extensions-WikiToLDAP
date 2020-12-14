@@ -41,6 +41,33 @@ class Hook {
 	}
 
 	/**
+	 * excuse to hook early in api call
+	 */
+	public static function onModuleManager(): void {
+		global $wgRevokePermissions;
+		global $wgGroupPermissions;
+		/**
+		 * We want autocompletion to work, so we need the API available.  If
+		 * there is a better way to do this, I'd like to know, but since it is
+		 * read only for authenticated users, I think we're fine.
+		 */
+		$conf = Config::newInstance();
+		unset($wgRevokePermissions[$conf->get( "MigrationGroup" )]['read']);
+		$wgGroupPermissions[$conf->get( "MigrationGroup" )]['read'] = true;
+	}
+
+	/**
+	 * When someone logs in with LDAP, take that user off the ldap migration list.
+	 */
+	public static function onPluggableAuthUserAuthorization(
+		User $user, bool &$authorized
+	): bool {
+		$conf = Config::newInstance();
+		$user->removeGroup( $conf->get( "MigrationGroup" ) );
+		return true;
+	}
+
+	/**
 	 * Redirect all users in the migrate-from-ldap group to the migration page
 	 */
 	public static function onUserCan(

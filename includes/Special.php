@@ -128,14 +128,30 @@ class Special extends FormSpecialPage {
 		];
     }
 
+	/**
+	 * Allow the user to select an account to merge the current one with.
+	 */
     public function selectAccount(): array {
+        return [
+			'user' => [
+				'type' => 'user',
+				'name' => 'user',
+				'label-message' => $this->getMessagePrefix() . '-select-account',
+				'size' => 30,
+				'id' => 'username',
+				'autofocus' => true,
+				'value' => '',
+				'required' => true
+			]
+		];
+    }
+
+    public function checkAccount(): array {
         return [];
     }
 
-    public function checkAccount() {
-    }
-
-    public function mergeAccount() {
+    public function mergeAccount(): array {
+        return [];
     }
 
 	/**

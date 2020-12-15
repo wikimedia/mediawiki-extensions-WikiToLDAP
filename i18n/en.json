@@ -11,6 +11,7 @@
 	"wikitoldap-introduction": "To update this account, you need to merge it with an LDAP account.",
 	"wikitoldap-select-account": "LDAP-backed account to use:",
 
+	"action-migrate-from-ldap": "migrate your account to an LDAP account",
 	"log-name-wikitoldap": "Wiki to LDAP account conversion",
 	"log-description-wikitoldap": "These are the logs from any account merging activity.",
 	"logentry-wikitoldap-redirect": "$1 {{GENDER:$2|was redirected}} to migrate {{GENDER:$2|his|her|their}} account when accessing $3",

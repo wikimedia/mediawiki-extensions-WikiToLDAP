@@ -42,4 +42,5 @@ Looks like the closest I can get right now is the hook =PluggableAuthPopulateGro
 - Discovered a [[https://phabricator.wikimedia.org/T270056][bug in LDAPAuthentication2]] because it wasn't setting $id and so groups could not be removed on login (which I need if someone logs in with LDAP — that user should not be marked for LDAP migration any more.)
 * Next step on migration, choose a user
 Done.  Had to hack the ability to do API reads even without permission to otherwise read.
-* Verify the user is
+* Verify the user is an LDAP user and that our user can log into the account
+Yay, not too much work and I learned to think a little more about how forms work and why sessons and stuff.

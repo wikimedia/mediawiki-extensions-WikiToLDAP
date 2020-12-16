@@ -63,7 +63,7 @@ class MoveToMigrationGroup extends Maintenance {
 
 	protected function moveToMigrationGroup( User $user ) :void {
 		$groups = $user->getGroups();
-		if ( ! in_array( $this->group, $groups ) ) {
+		if ( !in_array( $this->group, $groups ) ) {
 			$this->output( "Adding $user to {$this->group}... " );
 			$user->addGroup( $this->group );
 			$this->output( "done\n" );

@@ -10,6 +10,13 @@
 	"wikitoldap-legend": "Wiki to LDAP",
 	"wikitoldap-introduction": "To update this account, you need to merge it with an LDAP account.",
 	"wikitoldap-select-account": "LDAP-backed account to use:",
+	"wikitoldap-ldap-password": "LDAP password for '$1'",
+
+	"wikitoldap-invalid-account": "'$1' is not an account on this wiki",
+	"wikitoldap-not-migratable-account": "'$1' is not an LDAP-backed account.  If you think it is, please log to the wiki with it using LDAP first.",
+	"wikitoldap-account-problems": "'$1' does not pass validation, please go back a step and try again.",
+	"wikitoldap-only-one-domain": "WikiToLDAP currently only works with one LDAP domain.",
+	"wikitoldap-invalid-password": "Invalid password, please try again",
 
 	"action-migrate-from-ldap": "migrate your account to an LDAP account",
 	"log-name-wikitoldap": "Wiki to LDAP account conversion",

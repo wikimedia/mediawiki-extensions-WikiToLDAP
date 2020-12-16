@@ -23,9 +23,6 @@ namespace MediaWiki\Extension\WikiToLDAP;
 
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
-use OutputPage;
-use RequestContext;
-use Skin;
 use Title;
 use User;
 
@@ -37,7 +34,7 @@ class Hook {
 	public static function init(): void {
 		global $wgWhitelistRead;
 
-		$wgWhitelistRead[] = "Special:" . Special::PageName;
+		$wgWhitelistRead[] = "Special:" . Special::PAGENAME;
 	}
 
 	/**
@@ -58,7 +55,7 @@ class Hook {
 		Title $title, User $user, string $action, &$result
 	): bool {
 		$perm = MediaWikiServices::getInstance()->getPermissionManager();
-		$migrate = Title::makeTitleSafe( NS_SPECIAL, Special::PageName );
+		$migrate = Title::makeTitleSafe( NS_SPECIAL, Special::PAGENAME );
 
 		if (
 			$perm->userHasRight( $user, 'migrate-from-ldap' ) &&
@@ -70,7 +67,7 @@ class Hook {
 			$logEntry->setPerformer( $user );
 			$logEntry->setTarget( $title );
 			$logId = $logEntry->insert();
-			$logEntry->publish($logId);
+			$logEntry->publish( $logId );
 		}
 		return true;
 	}

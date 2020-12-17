@@ -27,6 +27,7 @@ use HTMLForm;
 use MediaWiki\Extension\LDAPProvider\ClientFactory;
 use MediaWiki\Extension\LDAPProvider\DomainConfigFactory;
 use Message;
+use MWException;
 use Status;
 use User;
 
@@ -110,7 +111,7 @@ class Special extends FormSpecialPage {
 		}
 	}
 
-	public function showStep( ?string $step ): array {
+	public function showStep( string $step ): array {
 		$method = $this->stepMap[$step]['method'];
 		$form = $this->$method();
 		$form['next'] = [
@@ -120,11 +121,10 @@ class Special extends FormSpecialPage {
 		return $form;
 	}
 
-	public function getNextStep( ?string $thisStep ): ?string {
-		$thisStep = $thisStep ?? "";
-		$nextStep = $this->stepMap[$thisStep]['next'] ?? null;
+	public function getNextStep( string $thisStep ): ?string {
+		$next = $this->stepMap[$thisStep] ?? null;
 
-		return $this->step[$nextStep]['par'] ?? null;
+		return $next['par'] ?? null;
 	}
 
 	public function displayIntro(): array {
@@ -153,7 +153,7 @@ class Special extends FormSpecialPage {
 		];
 	}
 
-	public function validateSelectAccount( ?string $account, array $data ) {
+	public function validateSelectAccount( string $account, array $data ) {
 		$user = User::newFromName( $account );
 		if ( $user === false || $user->getId() === 0 ) {
 			return new Message( $this->getMessagePrefix() . "-invalid-account", [ $account ] );
@@ -213,7 +213,12 @@ class Special extends FormSpecialPage {
 	}
 
 	public function mergeAccount(): array {
-		return [];
+		return [
+			"message" => [
+				"type" => "info",
+				"label-message" => $this->getMessagePrefix() . "-confirm-merge"
+			]
+		];
 	}
 
 	/**

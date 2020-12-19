@@ -27,10 +27,12 @@ use FormSpecialPage;
 use HTMLForm;
 use MediaWiki\Extension\LDAPProvider\ClientFactory;
 use MediaWiki\Extension\LDAPProvider\DomainConfigFactory;
+use MergeUser;
 use Message;
 use MWException;
 use Status;
 use User;
+use UserMergeLogger;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 /**
@@ -69,8 +71,12 @@ class Special extends FormSpecialPage {
 			"method" => "checkAccount"
 		],
 		[
-			"par" => "merge",
-			"method" => "mergeAccount"
+			"par" => "confirm",
+			"method" => "confirmMerge"
+		],
+		[
+			"par" => "merged",
+			"method" => "merged"
 		]
 	];
 
@@ -213,6 +219,10 @@ class Special extends FormSpecialPage {
 			return new Message( $this->getMessagePrefix() . "-invalid-account", [ $account ] );
 		}
 
+		if ( $user->getId() === $this->getUser()->getId() ) {
+			return new Message( $this->getMessagePrefix() . "-same-user", [ $user, $this->getUser() ] );
+		}
+
 		$groups = $user->getGroups();
 		$conf = Config::newInstance();
 		if ( in_array( $conf->get( "MigrationGroup" ), $groups ) ) {
@@ -296,7 +306,7 @@ class Special extends FormSpecialPage {
 		return true;
 	}
 
-	public function mergeAccount(): array {
+	public function confirmMerge(): array {
 		$username = $this->getSession( "user" );
 		$authenticated = $this->getSession( "authenticated" );
 
@@ -304,9 +314,68 @@ class Special extends FormSpecialPage {
 			throw new IncompleteFormException();
 		}
 
+		return [
+			"message" => [
+				"type" => "info",
+				"raw" => true,
+				"default" => new Message(
+					$this->getMessagePrefix() . "-confirm-merge", [ $this->getUser(), $username ]
+				)
+			],
+			"confirmed" => [
+				"type" => "hidden",
+				"default" => true
+			]
+		];
+	}
+
+	public function submitConfirmMerge( array $data ) {
+		throw new \Exception( "Called! " . var_export( $message, true ) );
+	}
+
+	public function merged(): array {
+		$username = $this->getSession( "user" );
+		$ldapUser = User::newFromName( $username );
+		$authenticated = $this->getSession( "authenticated" );
+		$confirmed = $this->getSession( "confirmed" );
+
+		if ( !$username || !$ldapUser || $ldapUser->getId() === 0 || !$authenticated || !$confirmed ) {
+			throw new IncompleteFormException();
+		}
+
+		$um = new MergeUser( $this->getUser(), $ldapUser, new UserMergeLogger() );
+		$um->merge( $this->getUser(), __METHOD__ );
+
 		$out = $this->getOutput();
-		$out->addJsConfigVars( "mergeInto", $username );
-		$out->addModules( "ext.wikiToLDAP.mergeAccount" );
+
+		$out->addWikiMsg(
+			'usermerge-success',
+			$this->getUser()->getName(), $this->getUser()->getId(),
+			$ldapUser->getName(), $ldapUser->getId()
+		);
+
+		$failed = $um->delete( $this->getUser(), [ $this, 'msg' ] );
+		$out->addWikiMsg(
+			'usermerge-userdeleted', $this->getUser()->getName(), $this->getUser()->getId()
+		);
+
+		if ( $failed ) {
+			// Output an error message for failed moves
+			$out->addHTML( Html::openElement( 'ul' ) );
+			$linkRenderer = $this->getLinkRenderer();
+			foreach ( $failed as $oldTitleText => $newTitle ) {
+				$oldTitle = Title::newFromText( $oldTitleText );
+				$out->addHTML(
+					Html::rawElement( 'li', [],
+									  $this->msg( 'usermerge-page-unmoved' )->rawParams(
+										  $linkRenderer->makeLink( $oldTitle ),
+										  $linkRenderer->makeLink( $newTitle )
+									  )->escaped()
+					)
+				);
+			}
+			$out->addHTML( Html::closeElement( 'ul' ) );
+		}
 
 		return [
 			"message" => [
@@ -344,7 +413,7 @@ class Special extends FormSpecialPage {
 	 */
 	public function onSubmit( array $data ): Status {
 		$next = $data["next"] ?? "";
-		unset( $data["next" ] );
+		unset( $data["next"] );
 
 		if ( $next ) {
 			$redirect = self::getTitleFor( self::PAGENAME, $next )->getFullURL();

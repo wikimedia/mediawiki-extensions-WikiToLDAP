@@ -48,3 +48,5 @@ Yay, not too much work and I learned to think a little more about how forms work
 - Can this be done while the user is logged in?
   - We should tell the user that they'll be logged out and they should log in again with their ldap account and verify everything
 	1. Can we show progress during merging?
+* We have a progress bar!
+- Still need to make stuff happen on the back end, but I'm pleased with where things are now.

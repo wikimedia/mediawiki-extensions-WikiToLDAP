@@ -1,5 +1,7 @@
 <?php
 /**
+ * Special page that handles account merging.
+ *
  * Copyright (C) 2020  NicheWork, LLC
  *
  * This program is free software: you can redistribute it and/or modify
@@ -15,7 +17,6 @@
  * You should have received a copy of the GNU General Public License
  * along with this program.  If not, see <http://www.gnu.org/licenses/>.
  *
- * @file
  * @author Mark A. Hershberger <mah@nichework.com>
  */
 
@@ -30,7 +31,11 @@ use Message;
 use MWException;
 use Status;
 use User;
+use Wikimedia\Timestamp\ConvertibleTimestamp;
 
+/**
+ * Special page that handles account merging.
+ */
 class Special extends FormSpecialPage {
 
 	/** The text of the submit button. */
@@ -41,6 +46,11 @@ class Special extends FormSpecialPage {
 	 * from other classes.
 	 */
 	public const PAGENAME = "MigrateUser";
+
+	/**
+	 * Key to use for return to url
+	 */
+	protected const RETURN_TO = "returnTo";
 
 	/**
 	 * The steps for migrating a user and the method tho
@@ -63,11 +73,42 @@ class Special extends FormSpecialPage {
 			"method" => "mergeAccount"
 		]
 	];
+
+	/**
+	 * A mapping of the steps for internal use.
+	 */
 	protected $stepMap = [];
+
+	/**
+	 * The last step, for ensuring things are working.
+	 */
+	protected $lastStep;
+
+	/**
+	 * Field variables that should not be persisted in the session
+	 */
+	protected $noPersist = [ 'password' ];
+
+	/**
+	 * Hold the session.
+	 */
+	protected $session;
 
 	public function __construct( $par = "" ) {
 		parent::__construct( self::PAGENAME, 'migrate-from-ldap' );
+		$this->session = $this->getRequest()->getSession();
+		$this->session->persist();
+
 		$this->setupStepMap();
+		$this->keepReturnTo();
+	}
+
+	public function keepReturnTo() {
+		$returnTo = $this->getRequest()->getVal( "returnto" );
+
+		if ( $returnTo ) {
+			$this->setSession( self::RETURN_TO, $returnTo );
+		}
 	}
 
 	protected function isValidMethod( string $method ): bool {
@@ -78,10 +119,6 @@ class Special extends FormSpecialPage {
 		$step = $step ?? "";
 
 		return isset( $this->stepMap[$step] );
-	}
-
-	public function getMessagePrefix() {
-		return "wikitoldap";
 	}
 
 	protected function setupStepMap() {
@@ -108,30 +145,47 @@ class Special extends FormSpecialPage {
 			if ( isset( $this->step[$num - 1] ) ) {
 				$this->stepMap[$step]['prev'] = $num - 1;
 			}
+			$this->lastStep = $step;
 		}
 	}
 
-	public function showStep( string $step ): array {
+	public function getMessagePrefix() {
+		return "wikitoldap";
+	}
+
+	public function showStep( ?string $step = "" ): array {
 		$method = $this->stepMap[$step]['method'];
-		$form = $this->$method();
-		$form['next'] = [
-			"type" => "hidden",
-			"default" => $this->getNextStep( $this->par )
-		];
+		$form = [];
+		try {
+			$form = $this->$method();
+			$form['next'] = [
+				"type" => "hidden",
+				"default" => $this->getNextStep()
+			];
+		} catch ( IncompleteFormException $e ) {
+			$this->restartForm();
+		} catch ( NoNextStepException $e ) {
+			if ( $step !== $this->lastStep ) {
+				throw $e;
+			}
+		}
 		return $form;
 	}
 
-	public function getNextStep( string $thisStep ): ?string {
-		$next = $this->stepMap[$thisStep] ?? null;
-
-		return $next['par'] ?? null;
+	public function getNextStep(): string {
+		if ( !isset( $this->stepMap[$this->par]['next'] ) ) {
+			throw new NoNextStepException( "Step {$this->par} does not have a next step" );
+		}
+		$next = $this->stepMap[$this->par]['next'];
+		return $this->step[$next]['par'];
 	}
 
 	public function displayIntro(): array {
 		return [
 			"message" => [
 				"type" => "info",
-				"label-message" => $this->getMessagePrefix() . "-introduction"
+				"rawrow" => true,
+				"default" => new Message( $this->getMessagePrefix() . "-introduction" )
 			]
 		];
 	}
@@ -147,7 +201,7 @@ class Special extends FormSpecialPage {
 				'size' => 30,
 				'autofocus' => true,
 				'validation-callback' => [ $this, 'validate' . __FUNCTION__ ],
-				'value' => $this->getRequest()->getSession()->get( "user" ),
+				'default' => $this->getSession( "user" ),
 				'required' => true
 			]
 		];
@@ -178,9 +232,33 @@ class Special extends FormSpecialPage {
 		return $domain[0];
 	}
 
+	protected function restartForm(): void {
+		$this->getOutput()->redirect(
+			self::getTitleFor( self::PAGENAME )->getFullURL()
+		);
+	}
+
+	protected function getSession( string $key ): ?string {
+		return $this->session->get( $this->getMessagePrefix() . $key );
+	}
+
+	protected function setSession( string $key, string $value ): void {
+		$this->session->set( $this->getMessagePrefix() . $key, $value );
+	}
+
+	protected function clearSession(): void {
+		$prefix = $this->getMessagePrefix();
+		$prefixLen = strlen( $prefix );
+
+		foreach ( $this->session as $key => $value ) {
+			if ( substr( $key, 0, $prefixLen ) === $prefix && $prefixLen < strlen( $key ) ) {
+				$this->session->remove( $key );
+			}
+		}
+	}
+
 	public function checkAccount(): array {
-		$session = $this->getRequest()->getSession();
-		$username = $session->get( "user" );
+		$username = $this->getSession( "user" );
 
 		return [
 			'password' => [
@@ -195,9 +273,13 @@ class Special extends FormSpecialPage {
 	}
 
 	public function validateCheckAccount( ?string $password, array $data ) {
-		$session = $this->getRequest()->getSession();
-		$username = $session->get( "user" );
+		$username = $this->getSession( "user" );
 		$domain = $this->getDomain();
+
+		if ( $username === null ) {
+			$this->restartForm();
+			return false;
+		}
 
 		if ( $this->validateSelectAccount( $username, [] ) !== true ) {
 			return new Message(
@@ -209,14 +291,30 @@ class Special extends FormSpecialPage {
 		if ( !$ldapClient->canBindAs( $username, $password ) ) {
 			return new Message( $this->getMessagePrefix() . "-invalid-password" );
 		}
+
+		$this->setSession( "authenticated", ConvertibleTimestamp::now() );
 		return true;
 	}
 
 	public function mergeAccount(): array {
+		$username = $this->getSession( "user" );
+		$authenticated = $this->getSession( "authenticated" );
+
+		if ( !$username || !$authenticated ) {
+			throw new IncompleteFormException();
+		}
+
+		$out = $this->getOutput();
+		$out->addJsConfigVars( "mergeInto", $username );
+		$out->addModules( "ext.wikiToLDAP.mergeAccount" );
+
 		return [
 			"message" => [
 				"type" => "info",
-				"label-message" => $this->getMessagePrefix() . "-confirm-merge"
+				"raw" => true,
+				"default" => new Message(
+					$this->getMessagePrefix() . "-confirm-merge", [ $this->getUser(), $username ]
+				)
 			]
 		];
 	}
@@ -226,9 +324,7 @@ class Special extends FormSpecialPage {
 	 */
 	protected function getFormFields(): array {
 		if ( !$this->isValidStep( $this->par ) ) {
-			$this->getOutput()->redirect(
-				self::getTitleFor( self::PAGENAME )->getFullURL()
-			);
+			$this->restartForm();
 			return [];
 		}
 		return $this->showStep( $this->par );
@@ -247,16 +343,24 @@ class Special extends FormSpecialPage {
 	 * Handle submission.... redirect, etc
 	 */
 	public function onSubmit( array $data ): Status {
-		$session = $this->getRequest()->getSession();
-		$session->persist();
-
 		$next = $data["next"] ?? "";
 		unset( $data["next" ] );
 
-		foreach ( $data as $key => $val ) {
-			$session->set( $key, $val );
+		if ( $next ) {
+			$redirect = self::getTitleFor( self::PAGENAME, $next )->getFullURL();
+			foreach ( $data as $key => $val ) {
+				if ( !in_array( $key, $this->noPersist ) ) {
+					$this->setSession( $key, $val );
+				}
+			}
+		} else {
+			$redirect = $this->getSession( self::RETURN_TO );
+			$this->clearSession();
 		}
-		$this->getOutput()->redirect( self::getTitleFor( self::PAGENAME, $next )->getFullURL() );
+
+		if ( $redirect ) {
+			$this->getOutput()->redirect( $redirect );
+		}
 		return Status::newGood();
 	}
 }

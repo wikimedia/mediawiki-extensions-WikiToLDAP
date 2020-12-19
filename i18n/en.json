@@ -8,9 +8,10 @@
 	"wikitoldap-group": "Wiki to LDAP group for account migration",
 
 	"wikitoldap-legend": "Wiki to LDAP",
-	"wikitoldap-introduction": "To update this account, you need to merge it with an LDAP account.",
+	"wikitoldap-introduction": "To continue, you need to merge this account with an LDAP-backed account.  This account's edit history will be merged with your LDAP-backed account.  If you want to continue to use this account, please merge it with your LDAP account first and then ask for the LDAP account to be renamed.",
 	"wikitoldap-select-account": "LDAP-backed account to use:",
-	"wikitoldap-ldap-password": "LDAP password for '$1'",
+	"wikitoldap-ldap-password": "LDAP password for '<tt>$1</tt>':",
+	"wikitoldap-confirm-merge": "You have successfully authenticated to the LDAP account <tt>$2</tt>.<br><br>If you are sure you want to merge the account you are currently logged into (<tt>$1</tt>) into the LDAP-backed account <tt>$2</tt>, submit this form.",
 
 	"wikitoldap-invalid-account": "'$1' is not an account on this wiki",
 	"wikitoldap-not-migratable-account": "'$1' is not an LDAP-backed account.  If you think it is, please log to the wiki with it using LDAP first.",

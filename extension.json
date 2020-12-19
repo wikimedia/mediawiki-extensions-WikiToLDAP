@@ -29,11 +29,11 @@
 		"remoteExtPath": "WikiToLDAP/resources"
 	},
 	"ResourceModules": {
-		"ext.wikiToLDAP": {
-			"dependencies": [],
+		"ext.wikiToLDAP.mergeAccount": {
+			"dependencies": [ "oojs-ui-core" ],
 			"messages": [],
 			"styles": [],
-			"scripts": []
+			"scripts": [ "mergeAccount.js" ]
 		}
 	},
 	"SpecialPages": {

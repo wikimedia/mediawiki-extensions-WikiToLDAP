@@ -61,7 +61,9 @@ class Hook {
 			$perm->userHasRight( $user, 'migrate-from-ldap' ) &&
 			$title->getNamespace() !== NS_SPECIAL
 		) {
-			header( "Location: " . $migrate->getFullURL() );
+			header( "Location: " . $migrate->getFullURL(
+				[ 'returnto' => $title->getPrefixedDBkey() ]
+			) );
 
 			$logEntry = new ManualLogEntry( "wikitoldap", "redirect" );
 			$logEntry->setPerformer( $user );

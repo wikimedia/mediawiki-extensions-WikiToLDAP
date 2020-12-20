@@ -12,6 +12,7 @@
 	"wikitoldap-select-account": "LDAP-backed account to use:",
 	"wikitoldap-ldap-password": "LDAP password for '<tt>$1</tt>':",
 	"wikitoldap-confirm-merge": "====You have successfully authenticated to the LDAP account <tt>$2</tt>.====\nIf you are ready to merge the account you are currently logged into (<tt>$1</tt>) into the LDAP-backed account (<tt>$2</tt>), submit this form.",
+	"wikitoldap-merge-done": "==== This account has been merged and deleted. ====\nYou are no longer logged in.  Please log in using your LDAP account.",
 
 	"wikitoldap-invalid-account": "'$1' is not an account on this wiki",
 	"wikitoldap-same-user": "'$1' is the same as '$2'",

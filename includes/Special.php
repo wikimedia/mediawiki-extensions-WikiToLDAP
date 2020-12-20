@@ -24,6 +24,7 @@ namespace MediaWiki\Extension\WikiToLDAP;
 
 use Exception;
 use FormSpecialPage;
+use Html;
 use HTMLForm;
 use MediaWiki\Extension\LDAPProvider\ClientFactory;
 use MediaWiki\Extension\LDAPProvider\DomainConfigFactory;
@@ -31,6 +32,7 @@ use MergeUser;
 use Message;
 use MWException;
 use Status;
+use Title;
 use User;
 use UserMergeLogger;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
@@ -48,11 +50,6 @@ class Special extends FormSpecialPage {
 	 * from other classes.
 	 */
 	public const PAGENAME = "MigrateUser";
-
-	/**
-	 * Key to use for return to url
-	 */
-	protected const RETURN_TO = "returnTo";
 
 	/**
 	 * The steps for migrating a user and the method tho
@@ -101,20 +98,18 @@ class Special extends FormSpecialPage {
 	protected $session;
 
 	public function __construct( $par = "" ) {
-		parent::__construct( self::PAGENAME, 'migrate-from-ldap' );
+		// After the user merge, they end up back here, but they're anonymous.
+		// So we'll send them to the front page.
+		if ( $this->getUser()->isAnon() ) {
+			$this->getOutput()->redirect( Title::newMainPage()->getFullURL() );
+			parent::__construct( self::PAGENAME );
+		} else {
+			parent::__construct( self::PAGENAME, 'migrate-from-ldap' );
+		}
 		$this->session = $this->getRequest()->getSession();
 		$this->session->persist();
 
 		$this->setupStepMap();
-		$this->keepReturnTo();
-	}
-
-	public function keepReturnTo() {
-		$returnTo = $this->getRequest()->getVal( "returnto" );
-
-		if ( $returnTo ) {
-			$this->setSession( self::RETURN_TO, $returnTo );
-		}
 	}
 
 	protected function isValidMethod( string $method ): bool {
@@ -159,20 +154,22 @@ class Special extends FormSpecialPage {
 		return "wikitoldap";
 	}
 
-	public function showStep( ?string $step = "" ): array {
-		$method = $this->stepMap[$step]['method'];
+	public function showStep( string $step = "" ): array {
 		$form = [];
-		try {
-			$form = $this->$method();
-			$form['next'] = [
-				"type" => "hidden",
-				"default" => $this->getNextStep()
-			];
-		} catch ( IncompleteFormException $e ) {
-			$this->restartForm();
-		} catch ( NoNextStepException $e ) {
-			if ( $step !== $this->lastStep ) {
-				throw $e;
+		if ( isset( $this->stepMap[$step]['method'] ) ) {
+			$method = $this->stepMap[$step]['method'];
+			try {
+				$form = $this->$method();
+				$form['next'] = [
+					"type" => "hidden",
+					"default" => $this->getNextStep()
+				];
+			} catch ( IncompleteFormException $e ) {
+				$this->restartForm();
+			} catch ( NoNextStepException $e ) {
+				if ( $step !== $this->lastStep ) {
+					throw $e;
+				}
 			}
 		}
 		return $form;
@@ -298,7 +295,7 @@ class Special extends FormSpecialPage {
 		}
 
 		$ldapClient = ClientFactory::getInstance()->getForDomain( $domain );
-		if ( !$ldapClient->canBindAs( $username, $password ) ) {
+		if ( $password !== null && !$ldapClient->canBindAs( $username, $password ) ) {
 			return new Message( $this->getMessagePrefix() . "-invalid-password" );
 		}
 
@@ -329,17 +326,16 @@ class Special extends FormSpecialPage {
 		];
 	}
 
-	public function submitConfirmMerge( array $data ) {
-		throw new \Exception( "Called! " . var_export( $message, true ) );
-	}
-
 	public function merged(): array {
 		$username = $this->getSession( "user" );
-		$ldapUser = User::newFromName( $username );
 		$authenticated = $this->getSession( "authenticated" );
 		$confirmed = $this->getSession( "confirmed" );
+		if ( !$username || !$authenticated || !$confirmed ) {
+			throw new IncompleteFormException();
+		}
 
-		if ( !$username || !$ldapUser || $ldapUser->getId() === 0 || !$authenticated || !$confirmed ) {
+		$ldapUser = User::newFromName( $username );
+		if ( !$ldapUser || $ldapUser->getId() === 0 ) {
 			throw new IncompleteFormException();
 		}
 
@@ -374,6 +370,7 @@ class Special extends FormSpecialPage {
 					)
 				);
 			}
+
 			$out->addHTML( Html::closeElement( 'ul' ) );
 		}
 
@@ -382,7 +379,7 @@ class Special extends FormSpecialPage {
 				"type" => "info",
 				"raw" => true,
 				"default" => new Message(
-					$this->getMessagePrefix() . "-confirm-merge", [ $this->getUser(), $username ]
+					$this->getMessagePrefix() . "-merge-done"
 				)
 			]
 		];
@@ -396,7 +393,7 @@ class Special extends FormSpecialPage {
 			$this->restartForm();
 			return [];
 		}
-		return $this->showStep( $this->par );
+		return $this->showStep( $this->par ?? "" );
 	}
 
 	/**
@@ -423,7 +420,6 @@ class Special extends FormSpecialPage {
 				}
 			}
 		} else {
-			$redirect = $this->getSession( self::RETURN_TO );
 			$this->clearSession();
 		}
 

@@ -50,3 +50,16 @@ Yay, not too much work and I learned to think a little more about how forms work
 	1. Can we show progress during merging?
 * We have a progress bar!
 - Still need to make stuff happen on the back end, but I'm pleased with where things are now.
+* Finished but no progress bar
+This are the steps needed to update.
+
+#+begin_src php
+
+pv ~/osgeo_wiki.sql | sudo mysql osgeo_wiki && \
+php html/w/maintenance/runJobs.php && \
+php html/w/maintenance/update.php --quick && \
+php html/w/extensions/SemanticMediaWiki/maintenance/rebuildData.php && \
+php html/w/extensions/SemanticMediaWiki/maintenance/updateEntityCountMap.php && \
+php html/w/extensions/WikiToLDAP/maintenance/MoveToMigrationGroup.php
+
+#+end_src

@@ -28,14 +28,6 @@
 		"localBasePath": "resources",
 		"remoteExtPath": "WikiToLDAP/resources"
 	},
-	"ResourceModules": {
-		"ext.wikiToLDAP.mergeAccount": {
-			"dependencies": [ "oojs-ui-core" ],
-			"messages": [],
-			"styles": [],
-			"scripts": [ "mergeAccount.js" ]
-		}
-	},
 	"SpecialPages": {
 		"MigrateUser": "MediaWiki\\Extension\\WikiToLDAP\\Special"
 	},

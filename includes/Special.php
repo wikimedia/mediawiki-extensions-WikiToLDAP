@@ -184,6 +184,7 @@ class Special extends FormSpecialPage {
 	}
 
 	public function displayIntro(): array {
+		$this->submitButton = "next-page";
 		return [
 			"message" => [
 				"type" => "info",
@@ -197,6 +198,7 @@ class Special extends FormSpecialPage {
 	 * Allow the user to select an account to merge the current one with.
 	 */
 	public function selectAccount(): array {
+		$this->submitButton = "next";
 		return [
 			'user' => [
 				'type' => 'user',
@@ -265,6 +267,8 @@ class Special extends FormSpecialPage {
 	}
 
 	public function checkAccount(): array {
+		$this->submitButton = "next";
+
 		$username = $this->getSession( "user" );
 
 		return [
@@ -327,6 +331,8 @@ class Special extends FormSpecialPage {
 	}
 
 	public function merged(): array {
+		$this->submitButton = $this->getMessagePrefix() . "-continue";
+
 		$username = $this->getSession( "user" );
 		$authenticated = $this->getSession( "authenticated" );
 		$confirmed = $this->getSession( "confirmed" );

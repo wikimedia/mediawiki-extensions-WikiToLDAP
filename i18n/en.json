@@ -4,6 +4,17 @@
 			"Mark A. Hershberger"
 		]
 	},
+
+	"group-wikitoldap-needs-migration": "Old wiki accounts",
+	"group-wikitoldap-needs-migration-member": "wiki account",
+	"grouppage-wikitoldap-needs-migration": "MediaWiki:wikitoldap-needs-migration",
+	"group-wikitoldap-in-progress": "Wiki accounts in progress of converting",
+	"group-wikitoldap-in-progress-member": "wiki in progress of converting",
+	"grouppage-wikitoldap-in-progress": "MediaWiki:wikitoldap-in-progress",
+
+	"wikitoldap-needs-migration": "Users in this group have not yet logged in, but their account needs to be converted to an LDAP-backed account.  People in this group may need to be contacted to encourage them to sign in and convert their account.",
+	"wikitoldap-in-progress": "Users in this group have logged in, but have not yet successfully completed converting it to an LDAP-backed account.  People in this group may need to be contacted to find out why they have not completed the conversion.",
+
 	"wikitoldap-desc": "Wiki to LDAP account conversion",
 	"wikitoldap-group": "Wiki to LDAP group for account migration",
 

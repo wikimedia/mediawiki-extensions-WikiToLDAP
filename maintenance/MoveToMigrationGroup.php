@@ -47,7 +47,7 @@ class MoveToMigrationGroup extends Maintenance {
 
 	public function execute() {
 		$conf = Config::newInstance();
-		$this->group = $conf->get( "MigrationGroup" );
+		$this->group = $conf->get( Config::MIGRATION_GROUP );
 
 		foreach ( $this->getUsers() as $user ) {
 			$this->moveToMigrationGroup( $user );

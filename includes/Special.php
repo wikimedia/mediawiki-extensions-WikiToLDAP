@@ -219,12 +219,14 @@ class Special extends FormSpecialPage {
 		}
 
 		if ( $user->getId() === $this->getUser()->getId() ) {
-			return new Message( $this->getMessagePrefix() . "-same-user", [ $user, $this->getUser() ] );
+			return new Message(
+				$this->getMessagePrefix() . "-same-user", [ $user, $this->getUser() ]
+			);
 		}
 
 		$groups = $user->getGroups();
 		$conf = Config::newInstance();
-		if ( in_array( $conf->get( "MigrationGroup" ), $groups ) ) {
+		if ( in_array( $conf->get( Config::MIGRATION_GROUP ), $groups ) ) {
 			return new Message(
 				$this->getMessagePrefix() . "-not-migratable-account", [ $account ]
 			);
@@ -418,6 +420,7 @@ class Special extends FormSpecialPage {
 		$next = $data["next"] ?? "";
 		unset( $data["next"] );
 
+		$redirect = null;
 		if ( $next ) {
 			$redirect = self::getTitleFor( self::PAGENAME, $next )->getFullURL();
 			foreach ( $data as $key => $val ) {

@@ -32,12 +32,66 @@
 		"MigrateUser": "MediaWiki\\Extension\\WikiToLDAP\\Special"
 	},
 	"GroupPermissions": {
-		"ldap-migration": {
+		"wikitoldap-in-progress": {
 			"migrate-from-ldap": true
 		}
 	},
 	"RevokePermissions": {
-		"ldap-migration": {
+		"wikitoldap-in-progress": {
+			"bigdelete": true,
+			"block": true,
+			"blockemail": true,
+			"browsearchive": true,
+			"confirmaccount": true,
+			"createclass": true,
+			"createpage": true,
+			"createtalk": true,
+			"datatransferimport": true,
+			"delete": true,
+			"deletechangetags": true,
+			"deletechangetags": true,
+			"deletelogentry": true,
+			"deleterevision": true,
+			"edit": true,
+			"editmyoptions": true,
+			"editmywatchlist": true,
+			"editprotected": true,
+			"editsemiprotected": true,
+			"editsitecss": true,
+			"editsiteinterface": true,
+			"editsitejs": true,
+			"editsitejson": true,
+			"editusercss": true,
+			"edituserjs": true,
+			"edituserjson": true,
+			"geocode": true,
+			"hideuser": true,
+			"import": true,
+			"importupload": true,
+			"lookupcredentials": true,
+			"managechangetags": true,
+			"mergehistory": true,
+			"move": true,
+			"move-categorypages": true,
+			"move-rootuserpages": true,
+			"move-subpages": true,
+			"movefile": true,
+			"nuke": true,
+			"protect": true,
+			"reupload": true,
+			"smw-admin": true,
+			"suppressionlog": true,
+			"suppressrevision": true,
+			"upload": true,
+			"userrights": true,
+			"viewedittab": true,
+			"viewmyprivateinfo": true,
+			"viewmywatchlist": true,
+			"viewmywatchlist": true,
+			"viewsuppressed": true,
+			"writeapi": true
+		},
+		"wikitoldap-needs-migration": {
 			"bigdelete": true,
 			"block": true,
 			"blockemail": true,
@@ -95,7 +149,12 @@
 	"config_prefix": "WikiToLDAP",
 	"config": {
 		"MigrationGroup": {
-			"value": "ldap-migration",
+			"value": "wikitoldap-needs-migration",
+			"public": true,
+			"path": false
+		},
+		"InProgressGroup": {
+			"value": "wikitoldap-in-progress",
 			"public": true,
 			"path": false
 		}

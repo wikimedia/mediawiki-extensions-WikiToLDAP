@@ -63,3 +63,6 @@ php html/w/extensions/SemanticMediaWiki/maintenance/updateEntityCountMap.php && 
 php html/w/extensions/WikiToLDAP/maintenance/MoveToMigrationGroup.php
 
 #+end_src
+
+* Do not automatically ok LDAP users
+- PluggableAuthUserAuthorization hook should not delete

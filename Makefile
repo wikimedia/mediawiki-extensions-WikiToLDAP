@@ -2,6 +2,9 @@
 
 DOC: index.pdf
 
+test:
+	composer test
+
 EMACS ?= emacs
 LATEX ?= latex
 

@@ -11,14 +11,12 @@
 		"test": [
 			"parallel-lint . --exclude vendor --exclude node_modules",
 			"phpcs -p -s --report=emacs",
-			"phan -m text --target-php-version 7.3",
+			"phan -m text --target-php-version 7.3 --no-progress-bar | sed 's, ,:,'",
 			"minus-x check ."
 		],
 		"fix": [
 			"minus-x fix .",
 			"phpcbf"
 		]
-	},
-	"require": {
 	}
 }

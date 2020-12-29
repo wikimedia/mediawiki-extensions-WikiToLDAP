@@ -32,20 +32,8 @@ class Hook {
 	 * Handle any initialisation
 	 */
 	public static function init(): void {
-		global $wgWhitelistRead;
-
-		$wgWhitelistRead[] = "Special:" . Special::PAGENAME;
-	}
-
-	/**
-	 * When someone logs in with LDAP, take that user off the ldap migration list.
-	 */
-	public static function onPluggableAuthUserAuthorization(
-		User $user, bool &$authorized
-	): bool {
-		$conf = Config::newInstance();
-		$user->removeGroup( $conf->get( "MigrationGroup" ) );
-		return true;
+		$GLOBALS["wgPluggableAuth_Class"] = __NAMESPACE__ . "\\PluggableAuth";
+		$GLOBALS["wgWhitelistRead"][] = "Special:" . Special::PAGENAME;
 	}
 
 	/**

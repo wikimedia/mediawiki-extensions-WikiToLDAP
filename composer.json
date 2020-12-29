@@ -1,4 +1,28 @@
 {
+	"name": "mediawiki/wiki-to-ldap",
+	"extra": {
+		"installer-name": "WikiToLDAP"
+	},
+	"license": "GPL-3.0+",
+	"type": "mediawiki-extension",
+	"homepage": "https://www.mediawiki.org/wiki/Extension:WikiToLDAP",
+	"description": "Provides a way to migrate wiki users to LDAP-backed users",
+	"keywords": [
+		"extension",
+		"wiki",
+		"mediawiki",
+		"ldap"
+	],
+	"authors": [
+		{
+			"name": "Mark A. Hershberger",
+			"email": "mah@nichework.com",
+			"role": "Developer"
+		}
+	],
+	"require": {
+		"mediawiki/ldap-authentication-2": "~1.0"
+	},
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "^31.0",
 		"mediawiki/minus-x": "1.1.0",

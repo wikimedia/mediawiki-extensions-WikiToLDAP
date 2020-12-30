@@ -18,8 +18,8 @@
 	},
 	"Hooks": {
 		"userCan": "MediaWiki\\Extension\\WikiToLDAP\\Hook::onUserCan",
-		"PluggableAuthPopulateGroups":
-		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthPopulateGroups"
+		"PluggableAuthUserAuthorization":
+		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthUserAuthorization"
 	},
 	"MessagesDirs": {
 		"WikiToLDAP": [
@@ -153,12 +153,17 @@
 		"MigrationGroup": {
 			"value": "wikitoldap-needs-migration",
 			"public": true,
-			"path": false
+			"descriptionmsg": "wikitoldap-migrationgroup-desc"
 		},
 		"InProgressGroup": {
 			"value": "wikitoldap-in-progress",
 			"public": true,
-			"path": false
+			"descriptionmsg": "wikitoldap-inprogressgroup-desc"
+		},
+		"MigrationInProgress": {
+			"value": true,
+			"public": true,
+			"descriptionmsg": "wikitoldap-migrationinprogress-desc"
 		}
 	},
 	"callback": "MediaWiki\\Extension\\WikiToLDAP\\Hook::init",

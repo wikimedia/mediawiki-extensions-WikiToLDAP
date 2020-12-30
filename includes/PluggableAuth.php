@@ -21,10 +21,41 @@
 namespace MediaWiki\Extension\WikiToLDAP;
 
 use MediaWiki\Extension\LDAPAuthentication2\PluggableAuth as PluggableAuthBase;
+use MWException;
 use User;
 use UserGroupMembership;
 
 class PluggableAuth extends PluggableAuthBase {
+	/**
+	 * Adjust the groups for a user based on how it logged in.
+	 */
+	protected function fixupGroups( User $user ) {
+		$id = $user->getId();
+		$dbw = wfGetDB( DB_MASTER );
+		$group = UserGroupMembership::getMembershipsForUser( $id, $dbw );
+		$config = Config::newInstance();
+		$migrationGroup = $config->get( Config::MIGRATION_GROUP );
+		$inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
+
+		$sectionId = $dbw->startAtomic( __METHOD__ );
+		if ( isset( $group[ $migrationGroup ] ) ) {
+			$msg = "Removed $username from $migrationGroup";
+			if ( $group[ $migrationGroup ]->delete( $dbw ) === false ) {
+				$msg = "Trouble removing $username from $migrationGroup";
+			}
+			wfDebugLog( "wikitoldap", $msg );
+		}
+		if ( !isset( $group[ $inProgressGroup ] ) ) {
+			$ugm = new UserGroupMembership( $id, $inProgressGroup );
+			$msg = "Added $username to $inProgressGroup";
+			if ( $ugm->insert( $dbw ) === false ) {
+				$msg = "Trouble adding $username to $inProgressGroup";
+			}
+			wfDebugLog( "wikitoldap", $msg );
+		}
+		$dbw->endAtomic( __METHOD__ );
+	}
+
 	/**
 	 * Determine if this is a wiki account that they are logging into.  If it
 	 * is, ensure that it is removed from the MigrationGroup and is in the
@@ -49,40 +80,32 @@ class PluggableAuth extends PluggableAuthBase {
 		&$id,
 		&$errorMessage
 	) {
- 		$config = Config::newInstance();
 		$user = User::newFromName( $username );
 		if ( $user === false || $user->getId() === 0 ) {
 			return null;
 		}
 
+		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
+
+		// If they were never in the migration_group, they aren't a wiki user
+		if ( !in_array( Config::MIGRATION_GROUP, $allGroups ) ) {
+			return null;
+		}
+
 		// Validate local user the mediawiki way
 		if ( $this->checkLocalPassword( $username, $password ) ) {
-			$id = $user->getId();
-			$dbw = wfGetDB( DB_MASTER );
-			$group = UserGroupMembership::getMembershipsForUser( $id, $dbw );
+			$this->fixupGroups( $user );
 
-			$sectionId = $dbw->startAtomic( __METHOD__ );
-			$groupOut = $config->get( Config::MIGRATION_GROUP );
-			$groupIn = $config->get( Config::IN_PROGRESS_GROUP );
-			if ( isset( $group[ $groupOut ] ) ) {
-				if ( $group[ $groupOut ]->delete( $dbw ) === false ) {
-					throw new \MWException( "Trouble removing $username from $groupOut" );
-					wfDebugLog( "wikitoldap", "Trouble removing $username from $groupOut" );
-				}
-			}
-			if ( !isset( $group[ $groupIn ] ) ) {
-				$ugm = new UserGroupMembership( $id, $groupIn );
-				if ( $ugm->insert( $dbw ) === false ) {
-					throw new \MWException( "Trouble adding $username to $groupIn" );
-					wfDebugLog( "wikitoldap", "Trouble adding $username to $groupIn" );
-				}
-			}
-			$dbw->endAtomic( __METHOD__ );
-
+			wfDebugLog( "wikitoldap", "Successful local login for $username" );
 			return true;
 		}
 
-		$errorMessage = wfMessage( "loginerror" )->plain();
+		wfDebugLog( "wikitoldap", "Failed local login for $username" );
+		$msg = "wrongpassword";
+		if ( empty( $password ) ) {
+			$msg .= "empty";
+		}
+		$errorMessage = wfMessage( $msg )->plain();
 		return false;
 	}
 }

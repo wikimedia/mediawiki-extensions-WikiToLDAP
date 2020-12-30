@@ -25,6 +25,7 @@ class Config extends GlobalVarConfig {
 
 	public const MIGRATION_GROUP = "MigrationGroup";
 	public const IN_PROGRESS_GROUP = "InProgressGroup";
+	public const MIGRATION_IN_PROGRESS = "MigrationInProgress";
 
 	public function __construct() {
 		parent::__construct( 'WikiToLDAP' );

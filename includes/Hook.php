@@ -25,23 +25,37 @@ use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use Title;
 use User;
+use UserGroupMembership;
 
 class Hook {
+
+	private static $isWorking = false;
 
 	/**
 	 * Handle any initialisation
 	 */
 	public static function init(): void {
+		$conf = Config::newInstance();
+		if ( $conf->get( Config::MIGRATION_IN_PROGRESS ) === false ) {
+			return;
+		}
+		self::$isWorking = true;
 		$GLOBALS["wgPluggableAuth_Class"] = __NAMESPACE__ . "\\PluggableAuth";
 		$GLOBALS["wgWhitelistRead"][] = "Special:" . Special::PAGENAME;
 	}
 
 	/**
 	 * Redirect all users in the migrate-from-ldap group to the migration page
+	 *
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/userCan
 	 */
 	public static function onUserCan(
 		Title $title, User $user, string $action, &$result
-	): bool {
+	): void {
+		if ( self::$isWorking === false ) {
+			return;
+		}
+
 		$perm = MediaWikiServices::getInstance()->getPermissionManager();
 		$migrate = Title::makeTitleSafe( NS_SPECIAL, Special::PAGENAME );
 
@@ -59,6 +73,43 @@ class Hook {
 			$logId = $logEntry->insert();
 			$logEntry->publish( $logId );
 		}
-		return true;
+	}
+
+	/**
+	 * Don't offer any input on whether a user should be authorized, but set
+	 * up groups on a new login.
+	 *
+	 * This has to be here and not at the time of LDAP authentication.  Before
+	 * this point, we can't tell if we have a new user or not, let alone what
+	 * groups the user has been a member of.
+	 *
+	 * @see https://www.mediawiki.org/wiki/Extension:PluggableAuth/Hooks/PluggableAuthUserAuthorization
+	 */
+	public static function onPluggableAuthUserAuthorization( User $user, &$authorized ): void {
+		if ( self::$isWorking === false ) {
+			return;
+		}
+
+		wfDebugLog( "wikitoldap", "Checking to see if we need to migrate $user..." );
+		if ( $user->getId() === 0 ) {
+			$config = Config::newInstance();
+			$inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
+
+			$user->addToDatabase();
+			$id = $user->getId();
+			$username = $user->getName();
+
+			wfDebugLog( "wikitoldap", "New user: $user ($id)" );
+
+			$ugm = new UserGroupMembership( $id, $inProgressGroup );
+			$dbw = wfGetDB( DB_MASTER );
+			$dbw->startAtomic( __METHOD__ );
+			$msg = "Added $username to $inProgressGroup";
+			if ( $ugm->insert( $dbw ) === false ) {
+				$msg = "Trouble adding $username to $inProgressGroup";
+			}
+			wfDebugLog( "wikitoldap", $msg );
+			$dbw->endAtomic( __METHOD__ );
+		}
 	}
 }

@@ -26,37 +26,29 @@ use User;
 use UserGroupMembership;
 
 class PluggableAuth extends PluggableAuthBase {
+	protected $migrationGroup;
+
+	public function __construct() {
+		$config = Config::newInstance();
+		$this->migrationGroup = $config->get( Config::MIGRATION_GROUP );
+	}
+
 	/**
 	 * Adjust the groups for a user based on how it logged in.
 	 */
-	protected function fixupGroups( User $user ) {
-		$id = $user->getId();
+	protected function fixupGroups( int $id, string $username ) {
 		$dbw = wfGetDB( DB_MASTER );
 		$group = UserGroupMembership::getMembershipsForUser( $id, $dbw );
-		$config = Config::newInstance();
-		$migrationGroup = $config->get( Config::MIGRATION_GROUP );
-		$inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
-		$username = $user->getName();
 
-		$sectionId = $dbw->startAtomic( __METHOD__ );
-		if ( isset( $group[ $migrationGroup ] ) ) {
-			$msg = "Removed $username from $migrationGroup";
-			if ( $group[ $migrationGroup ]->delete( $dbw ) === false ) {
-				$msg = "Trouble removing $username from $migrationGroup";
+		if ( isset( $group[ $this->migrationGroup ] ) ) {
+			$sectionId = $dbw->startAtomic( __METHOD__ );
+			$msg = "Removed $username from $this->migrationGroup";
+			if ( $group[ $this->migrationGroup ]->delete( $dbw ) === false ) {
+				$msg = "Trouble removing $username from {$this->migrationGroup}";
 			}
+			$dbw->endAtomic( __METHOD__ );
 			wfDebugLog( "wikitoldap", $msg );
 		}
-		if ( !isset( $group[ $inProgressGroup ] ) ) {
-			$ugm = new UserGroupMembership( $id, $inProgressGroup );
-			$msg = "Added $username to $inProgressGroup";
-			if ( $ugm->insert( $dbw ) === false ) {
-				wfDebugLog( "wikitoldap", var_export( $user->getGroups(), true ) );
-
-				$msg = "Trouble adding $username to $inProgressGroup";
-			}
-			wfDebugLog( "wikitoldap", $msg );
-		}
-		$dbw->endAtomic( __METHOD__ );
 	}
 
 	/**
@@ -89,19 +81,18 @@ class PluggableAuth extends PluggableAuthBase {
 			return null;
 		}
 
-		$config = Config::newInstance();
-		$migrationGroup = $config->get( Config::MIGRATION_GROUP );
 		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
 
 		// If they were never in the migration_group, they aren't a wiki user
-		if ( !in_array( $migrationGroup, $allGroups ) ) {
-			wfDebugLog( "wikitoldap", "$username was never in the Migration group." );
+		if ( !in_array( $this->migrationGroup, $allGroups ) ) {
+			wfDebugLog( "wikitoldap", "$username was never in the {$this->migrationGroup}." );
 			return null;
 		}
 
 		// Validate local user the mediawiki way
 		if ( $this->checkLocalPassword( $username, $password ) ) {
-			$this->fixupGroups( $user );
+			$id = $user->getId();
+			$this->fixupGroups( $id, $user->getName() );
 
 			wfDebugLog( "wikitoldap", "Successful local login for $username" );
 			return true;

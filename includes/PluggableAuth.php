@@ -36,6 +36,7 @@ class PluggableAuth extends PluggableAuthBase {
 		$config = Config::newInstance();
 		$migrationGroup = $config->get( Config::MIGRATION_GROUP );
 		$inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
+		$username = $user->getName();
 
 		$sectionId = $dbw->startAtomic( __METHOD__ );
 		if ( isset( $group[ $migrationGroup ] ) ) {
@@ -49,6 +50,8 @@ class PluggableAuth extends PluggableAuthBase {
 			$ugm = new UserGroupMembership( $id, $inProgressGroup );
 			$msg = "Added $username to $inProgressGroup";
 			if ( $ugm->insert( $dbw ) === false ) {
+				wfDebugLog( "wikitoldap", var_export( $user->getGroups(), true ) );
+
 				$msg = "Trouble adding $username to $inProgressGroup";
 			}
 			wfDebugLog( "wikitoldap", $msg );
@@ -82,13 +85,17 @@ class PluggableAuth extends PluggableAuthBase {
 	) {
 		$user = User::newFromName( $username );
 		if ( $user === false || $user->getId() === 0 ) {
+			wfDebugLog( "wikitoldap", "No DB entry for $username. Not a local user." );
 			return null;
 		}
 
+		$config = Config::newInstance();
+		$migrationGroup = $config->get( Config::MIGRATION_GROUP );
 		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
 
 		// If they were never in the migration_group, they aren't a wiki user
-		if ( !in_array( Config::MIGRATION_GROUP, $allGroups ) ) {
+		if ( !in_array( $migrationGroup, $allGroups ) ) {
+			wfDebugLog( "wikitoldap", "$username was never in the Migration group." );
 			return null;
 		}
 

@@ -83,24 +83,23 @@ class Hook {
 	 * this point, we can't tell if we have a new user or not, let alone what
 	 * groups the user has been a member of.
 	 *
-	 * @see https://www.mediawiki.org/wiki/Extension:PluggableAuth/Hooks/PluggableAuthUserAuthorization
+	 * @see https://www.mediawiki.org/wiki/Extension:PluggableAuth/Hooks/PluggableAuthPopulatedGroups
 	 */
-	public static function onPluggableAuthUserAuthorization( User $user, &$authorized ): void {
+	public static function onPluggableAuthPopulateGroups( User $user ): void {
 		if ( self::$isWorking === false ) {
 			return;
 		}
 
+		$id = $user->getId();
+		$username = $user->getName();
+
 		wfDebugLog( "wikitoldap", "Checking to see if we need to migrate $user..." );
-		if ( $user->getId() === 0 ) {
-			$config = Config::newInstance();
-			$inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
+		$config = Config::newInstance();
+		$inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
 
-			$user->addToDatabase();
-			$id = $user->getId();
-			$username = $user->getName();
-
-			wfDebugLog( "wikitoldap", "New user: $user ($id)" );
-
+		# If they are not and never have been in the in-progress group, we need them in it.
+		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
+		if ( !in_array( $inProgressGroup, $allGroups ) ) {
 			$ugm = new UserGroupMembership( $id, $inProgressGroup );
 			$dbw = wfGetDB( DB_MASTER );
 			$dbw->startAtomic( __METHOD__ );

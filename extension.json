@@ -18,8 +18,8 @@
 	},
 	"Hooks": {
 		"userCan": "MediaWiki\\Extension\\WikiToLDAP\\Hook::onUserCan",
-		"PluggableAuthUserAuthorization":
-		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthUserAuthorization"
+		"PluggableAuthPopulateGroups":
+		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthPopulateGroups"
 	},
 	"MessagesDirs": {
 		"WikiToLDAP": [

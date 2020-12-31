@@ -40,7 +40,7 @@ use Wikimedia\Timestamp\ConvertibleTimestamp;
 /**
  * Special page that handles account merging.
  */
-class Special extends FormSpecialPage {
+class SpecialWikiMerge extends FormSpecialPage {
 
 	/** The text of the submit button. */
 	private $submitButton = null;
@@ -49,7 +49,7 @@ class Special extends FormSpecialPage {
 	 * How this page is accessed ... This is here so we can do static calls
 	 * from other classes.
 	 */
-	public const PAGENAME = "MigrateUser";
+	public const PAGENAME = "WikiUserMerge";
 
 	/**
 	 * The steps for migrating a user and the method tho

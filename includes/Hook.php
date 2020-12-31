@@ -41,7 +41,24 @@ class Hook {
 		}
 		self::$isWorking = true;
 		$GLOBALS["wgPluggableAuth_Class"] = __NAMESPACE__ . "\\PluggableAuth";
-		$GLOBALS["wgWhitelistRead"][] = "Special:" . Special::PAGENAME;
+		$GLOBALS["wgWhitelistRead"][] = "Special:" . SpecialWikiMerge::PAGENAME;
+		$GLOBALS["wgWhitelistRead"][] = "Special:" . SpecialLDAPMerge::PAGENAME;
+	}
+
+	private static function getGroup( string $groupKey ): string {
+		$config = Config::newInstance();
+		return $config->get( $groupKey );
+	}
+
+	private static function getWizardPage( User $user ): ?Title {
+		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
+		$page = null;
+		if ( in_array( self::getGroup( Config::MIGRATION_GROUP ), $allGroups ) ) {
+			$page = Title::makeTitleSafe( NS_SPECIAL, SpecialWikiMerge::PAGENAME );
+		} elseif( in_array( self::getGroup( Config::IN_PROGRESS_GROUP ), $allGroups ) ) {
+			$page = Title::makeTitleSafe( NS_SPECIAL, SpecialLDAPMerge::PAGENAME );
+		}
+		return $page;
 	}
 
 	/**
@@ -51,33 +68,38 @@ class Hook {
 	 */
 	public static function onUserCan(
 		Title $title, User $user, string $action, &$result
-	): void {
+	): ?bool {
 		if ( self::$isWorking === false ) {
-			return;
+			return null;
 		}
 
 		$perm = MediaWikiServices::getInstance()->getPermissionManager();
-		$migrate = Title::makeTitleSafe( NS_SPECIAL, Special::PAGENAME );
-
 		if (
 			$perm->userHasRight( $user, 'migrate-from-ldap' ) &&
 			$title->getNamespace() !== NS_SPECIAL
 		) {
-			header( "Location: " . $migrate->getFullURL(
-				[ 'returnto' => $title->getPrefixedDBkey() ]
-			) );
+			$migrate = self::getWizardPage( $user );
 
-			$logEntry = new ManualLogEntry( "wikitoldap", "redirect" );
-			$logEntry->setPerformer( $user );
-			$logEntry->setTarget( $title );
-			$logId = $logEntry->insert();
-			$logEntry->publish( $logId );
+			if ( $migrate !== null ) {
+				header( "Location: " . $migrate->getFullURL(
+					[ 'returnto' => $title->getPrefixedDBkey() ]
+				) );
+
+				$logEntry = new ManualLogEntry( "wikitoldap", "redirect" );
+				$logEntry->setPerformer( $user );
+				$logEntry->setTarget( $title );
+				$logId = $logEntry->insert();
+				$logEntry->publish( $logId );
+
+				// Don't do anything else with this hook since we're redirecting
+				return false;
+			}
 		}
+		return null;
 	}
 
 	/**
-	 * Don't offer any input on whether a user should be authorized, but set
-	 * up groups on a new login.
+	 * Set up groups on a new login.
 	 *
 	 * This has to be here and not at the time of LDAP authentication.  Before
 	 * this point, we can't tell if we have a new user or not, let alone what
@@ -94,8 +116,7 @@ class Hook {
 		$username = $user->getName();
 
 		wfDebugLog( "wikitoldap", "Checking to see if we need to migrate $user..." );
-		$config = Config::newInstance();
-		$inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
+		$inProgressGroup = self::getGroup( Config::IN_PROGRESS_GROUP );
 
 		# If they are not and never have been in the in-progress group, we need them in it.
 		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );

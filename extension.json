@@ -31,7 +31,8 @@
 		"remoteExtPath": "WikiToLDAP/resources"
 	},
 	"SpecialPages": {
-		"MigrateUser": "MediaWiki\\Extension\\WikiToLDAP\\Special"
+		"WikiUserMerge": "MediaWiki\\Extension\\WikiToLDAP\\SpecialWikiMerge",
+		"LDAPUserMerge": "MediaWiki\\Extension\\WikiToLDAP\\SpecialLDAPMerge"
 	},
 	"GroupPermissions": {
 		"wikitoldap-in-progress": {

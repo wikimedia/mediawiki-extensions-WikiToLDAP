@@ -64,10 +64,6 @@ class Special extends FormSpecialPage {
 			"method" => "selectAccount"
 		],
 		[
-			"par" => "authenticate",
-			"method" => "checkAccount"
-		],
-		[
 			"par" => "confirm",
 			"method" => "confirmMerge"
 		],
@@ -200,37 +196,39 @@ class Special extends FormSpecialPage {
 	public function selectAccount(): array {
 		$this->submitButton = "next";
 		return [
-			'user' => [
-				'type' => 'user',
+			'username' => [
 				'label-message' => $this->getMessagePrefix() . '-select-account',
 				'size' => 30,
+				'type' => 'user',
 				'autofocus' => true,
-				'validation-callback' => [ $this, 'validate' . __FUNCTION__ ],
 				'default' => $this->getSession( "user" ),
+				'required' => true
+			],
+			'password' => [
+				'label-message' => new Message( $this->getMessagePrefix() . '-ldap-password' ),
+				'validation-callback' => [ $this, 'validatePassword' ],
+				'type' => 'password',
 				'required' => true
 			]
 		];
 	}
 
-	public function validateSelectAccount( string $account, array $data ) {
-		$user = User::newFromName( $account );
-		if ( $user === false || $user->getId() === 0 ) {
-			return new Message( $this->getMessagePrefix() . "-invalid-account", [ $account ] );
+	public function validatePassword( ?string $password, array $data ) {
+		$username = $data['username'] ?? null;
+		if ( empty( $username ) ) {
+			return new Message( $this->getMessagePrefix() . "-empty-username" );
 		}
 
-		if ( $user->getId() === $this->getUser()->getId() ) {
-			return new Message(
-				$this->getMessagePrefix() . "-same-user", [ $user, $this->getUser() ]
-			);
+		if ( empty( $password ) ) {
+			return new Message( $this->getMessagePrefix() . "-empty-password" );
 		}
 
-		$groups = $user->getGroups();
-		$conf = Config::newInstance();
-		if ( in_array( $conf->get( Config::MIGRATION_GROUP ), $groups ) ) {
-			return new Message(
-				$this->getMessagePrefix() . "-not-migratable-account", [ $account ]
-			);
+		$ldapClient = ClientFactory::getInstance()->getForDomain( $this->getDomain() );
+		if ( !$ldapClient->canBindAs( $username, $password ) ) {
+			return new Message( $this->getMessagePrefix() . "-invalid-password" );
 		}
+		$this->setSession( "authenticated", ConvertibleTimestamp::now() );
+
 		return true;
 	}
 
@@ -268,52 +266,17 @@ class Special extends FormSpecialPage {
 		}
 	}
 
-	public function checkAccount(): array {
-		$this->submitButton = "next";
-
-		$username = $this->getSession( "user" );
-
-		return [
-			'password' => [
-				'label-message' => new Message(
-					$this->getMessagePrefix() . '-ldap-password', [ $username ]
-				),
-				'validation-callback' => [ $this, 'validate' . __FUNCTION__ ],
-				'type' => 'password',
-				'required' => true
-			]
-		];
-	}
-
-	public function validateCheckAccount( ?string $password, array $data ) {
-		$username = $this->getSession( "user" );
-		$domain = $this->getDomain();
-
-		if ( $username === null ) {
-			$this->restartForm();
-			return false;
-		}
-
-		if ( $this->validateSelectAccount( $username, [] ) !== true ) {
-			return new Message(
-				$this->getMessagePrefix() . "-account-problems", [ $username ]
-			);
-		}
-
-		$ldapClient = ClientFactory::getInstance()->getForDomain( $domain );
-		if ( $password !== null && !$ldapClient->canBindAs( $username, $password ) ) {
-			return new Message( $this->getMessagePrefix() . "-invalid-password" );
-		}
-
-		$this->setSession( "authenticated", ConvertibleTimestamp::now() );
-		return true;
-	}
-
 	public function confirmMerge(): array {
-		$username = $this->getSession( "user" );
+		$username = $this->getSession( "username" );
 		$authenticated = $this->getSession( "authenticated" );
 
 		if ( !$username || !$authenticated ) {
+			wfDebugLog(
+				"wikitoldap", "Empty session information: " .
+				var_export(
+					[ "username" => $username, "authenticated" => $authenticated ], true
+				)
+			);
 			throw new IncompleteFormException();
 		}
 
@@ -335,7 +298,7 @@ class Special extends FormSpecialPage {
 	public function merged(): array {
 		$this->submitButton = $this->getMessagePrefix() . "-continue";
 
-		$username = $this->getSession( "user" );
+		$username = $this->getSession( "username" );
 		$authenticated = $this->getSession( "authenticated" );
 		$confirmed = $this->getSession( "confirmed" );
 		if ( !$username || !$authenticated || !$confirmed ) {
@@ -347,11 +310,11 @@ class Special extends FormSpecialPage {
 			throw new IncompleteFormException();
 		}
 
+		// We're saying the LDAP user is the "performer" since we're merging the two accounts
 		$um = new MergeUser( $this->getUser(), $ldapUser, new UserMergeLogger() );
-		$um->merge( $this->getUser(), __METHOD__ );
+		$um->merge( $ldapUser, __METHOD__ );
 
 		$out = $this->getOutput();
-
 		$out->addWikiMsg(
 			'usermerge-success',
 			$this->getUser()->getName(), $this->getUser()->getId(),

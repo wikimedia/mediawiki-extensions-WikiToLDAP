@@ -22,9 +22,9 @@
 	"wikitoldap-in-progress": "Users in this group have logged in, but have not yet successfully completed converting it to an LDAP-backed account.  People in this group may need to be contacted to find out why they have not completed the conversion.",
 
 	"wikitoldap-legend": "Wiki to LDAP",
-	"wikitoldap-introduction": "====If your userame on the wiki is the same as your username in LDAP, please log back in using LDAP====\nOtherwise....\n====Your user needs to be merged with an LDAP-backed user.====\n*If you do not yet have an LDAP-backed account, please create one.\n*If you have an LDAP-backed account, and have never used it to log into this wiki, please log out now and log into this wiki with your LDAP-backed account at least once so that the wiki is aware of it.\n*After you have logged into this wiki with your LDAP account, please log in again as your current user.  The wiki will direct you here again so the accounts can be merged.\n*Once the user merge process is complete, you will not be able to use this user to log in, but your LDAP-backed MediaWiki account will have this user's wiki contributions.",
-	"wikitoldap-select-account": "LDAP-backed account to use:",
-	"wikitoldap-ldap-password": "LDAP password for '<tt>$1</tt>':",
+	"wikitoldap-introduction": "====Your user needs to be merged with an LDAP-backed user.====\nIf you do not yet have an LDAP user, you will need to create one before you can continue.<br>",
+	"wikitoldap-select-account": "LDAP-backed username:",
+	"wikitoldap-ldap-password": "LDAP password:",
 	"wikitoldap-confirm-merge": "====You have successfully authenticated to the LDAP account <tt>$2</tt>.====\nIf you are ready to merge the account you are currently logged into (<tt>$1</tt>) into the LDAP-backed account (<tt>$2</tt>), submit this form.",
 	"wikitoldap-merge-done": "==== This account has been merged and deleted. ====\nYou are no longer logged in.  Please log in using your LDAP account.",
 	"wikitoldap-continue": "continue",

@@ -105,6 +105,11 @@ class SpecialWikiMerge extends FormSpecialPage {
 		$this->session = $this->getRequest()->getSession();
 		$this->session->persist();
 
+		$return = $this->getRequest()->getVal( "returnto" );
+		if ( $return ) {
+			$this->setSession( "returnto", $return );
+		}
+
 		$this->setupStepMap();
 	}
 
@@ -206,8 +211,9 @@ class SpecialWikiMerge extends FormSpecialPage {
 			'username' => [
 				'label-message' => $this->getMessagePrefix() . '-select-account',
 				'size' => 30,
-				'type' => 'user',
+				'type' => 'text',
 				'autofocus' => true,
+				'validation-callback' => [ $this, 'validateUsername' ],
 				'default' => $this->getSession( "user" ),
 				'required' => true
 			],
@@ -220,12 +226,17 @@ class SpecialWikiMerge extends FormSpecialPage {
 		];
 	}
 
-	public function validatePassword( ?string $password, array $data ) {
-		$username = $data['username'] ?? null;
+
+	public function validateUsername( ?string $username, array $data ) {
 		if ( empty( $username ) ) {
 			return new Message( $this->getMessagePrefix() . "-empty-username" );
 		}
 
+		return true;
+	}
+
+	public function validatePassword( ?string $password, array $data ) {
+		$username = $data['username'];
 		if ( empty( $password ) ) {
 			return new Message( $this->getMessagePrefix() . "-empty-password" );
 		}
@@ -287,13 +298,36 @@ class SpecialWikiMerge extends FormSpecialPage {
 			throw new IncompleteFormException();
 		}
 
+		$ldapUser = User::newFromName( $username );
+		# The ldap user is the same username as the wiki user, so report complete
+		if ( $ldapUser && $ldapUser->getId() === $this->getUser()->getId() ) {
+			$status = UserStatus::singleton();
+			$status->setNotInProgress( $ldapUser );
+			$status->setNotWiki( $ldapUser );
+			$this->submitButton = $this->getMessagePrefix() . "-return";
+
+			$msg = new Message( $this->getMessagePrefix() . "-merge-not-needed" );
+			return [
+				'message' => [
+					"type" => "info",
+					"raw" => true,
+					"default" => $msg->parse()
+				],
+				'done' => [
+					"type" => "hidden",
+					"default" => true
+				]
+			];
+		}
+
+		$msg = new Message(
+			$this->getMessagePrefix() . "-confirm-merge", [ $this->getUser(), $username ]
+		);
 		return [
 			"message" => [
 				"type" => "info",
 				"raw" => true,
-				"default" => new Message(
-					$this->getMessagePrefix() . "-confirm-merge", [ $this->getUser(), $username ]
-				)
+				"default" => $msg->parse()
 			],
 			"confirmed" => [
 				"type" => "hidden",
@@ -308,15 +342,38 @@ class SpecialWikiMerge extends FormSpecialPage {
 		$username = $this->getSession( "username" );
 		$authenticated = $this->getSession( "authenticated" );
 		$confirmed = $this->getSession( "confirmed" );
+		$done = $this->getSession( "done" );
+
+		if ( $done ) {
+			$title = Title::newFromText( $this->getSession( 'returnto' ) )
+				   ?? Title::newMainPage();
+			$this->getOutput()->redirect( $title->getFullURL() );
+			return [];
+		}
+
 		if ( !$username || !$authenticated || !$confirmed ) {
+			wfDebugLog( "wikitoldap", "Incomplete: $username/$authenticated/$confirmed" );
 			throw new IncompleteFormException();
 		}
 
-		$ldapUser = User::newFromName( $username );
-		if ( !$ldapUser || $ldapUser->getId() === 0 ) {
-			throw new IncompleteFormException();
+		exit();
+		$this->mergeUser( $ldapUser );
+		if ( $ldapUser && $ldapUser->getId() !== 0 ) {
+			$status = UserStatus::singleton();
+			if ( $status->isWikiUser( $ldapUser ) ) {}
 		}
 
+		$msg = new Message( $this->getMessagePrefix() . "-merge-done" );
+		return [
+			"message" => [
+				"type" => "info",
+				"raw" => true,
+				"default" => $msg->parse()
+			]
+		];
+	}
+
+	public function mergeUser( User $ldapUser ) {
 		// We're saying the LDAP user is the "performer" since we're merging the two accounts
 		$um = new MergeUser( $this->getUser(), $ldapUser, new UserMergeLogger() );
 		$um->merge( $ldapUser, __METHOD__ );
@@ -351,16 +408,6 @@ class SpecialWikiMerge extends FormSpecialPage {
 
 			$out->addHTML( Html::closeElement( 'ul' ) );
 		}
-
-		return [
-			"message" => [
-				"type" => "info",
-				"raw" => true,
-				"default" => new Message(
-					$this->getMessagePrefix() . "-merge-done"
-				)
-			]
-		];
 	}
 
 	/**
@@ -395,6 +442,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 			$redirect = self::getTitleFor( self::PAGENAME, $next )->getFullURL();
 			foreach ( $data as $key => $val ) {
 				if ( !in_array( $key, $this->noPersist ) ) {
+					wfDebugLog( "wikitoldap", "persisting '$key' with '$val'" );
 					$this->setSession( $key, $val );
 				}
 			}

@@ -26,28 +26,11 @@ use ApiResult;
 
 class API extends ApiBase {
 	public function execute() {
-		$ret = true;
 		$conf = Config::newInstance();
 		if ( $conf->get( Config::MIGRATION_IN_PROGRESS ) === false ) {
 			return true;
 		}
 
-		$user = $this->getUser();
-		$username = $user->getName();
-		$inProgressGroup = $conf->get( Config::IN_PROGRESS_GROUP );
-		$groups = $user->getGroups();
-		if ( !in_array( $inProgressGroup, $groups ) ) {
-			wfDebugLog( "wikitoldap", "Invalid remove  $username from $inProgressGroup!" );
-			return true;
-		}
-
-		$msg = "Removed $username from $inProgressGroup";
-		if ( $user->removeGroup( $inProgressGroup ) === false ) {
-			$msg = "Trouble removing $username from $inProgressGroup";
-			$ret = false;
-		}
-		wfDebugLog( "wikitoldap", $msg );
-
-		return $ret;
+		return UserStatus::singleton()->setNotInProgress( $this->getUser() );
 	}
 }

@@ -30,6 +30,7 @@ use MediaWiki\Extension\LDAPProvider\ClientFactory;
 use MediaWiki\Extension\LDAPProvider\DomainConfigFactory;
 use MergeUser;
 use Message;
+use MediaWiki\MediaWikiServices;
 use MWException;
 use Status;
 use Title;
@@ -104,6 +105,11 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		}
 		$this->session = $this->getRequest()->getSession();
 		$this->session->persist();
+
+		$return = $this->getRequest()->getVal( "returnto" );
+		if ( $return ) {
+			$this->setSession( "returnto", $return );
+		}
 
 		$this->setupStepMap();
 	}
@@ -217,15 +223,16 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		$this->submitButton = "next";
 		return [
 			'username' => [
-				'label-message' => $this->getMessagePrefix() . '-select-account',
+				'label-message' => $this->getMessagePrefix() . '-select-wiki-account',
 				'size' => 30,
 				'type' => 'user',
 				'autofocus' => true,
+				'validation-callback' => [ $this, 'validateUsername' ],
 				'default' => $this->getSession( "user" ),
 				'required' => true
 			],
 			'password' => [
-				'label-message' => new Message( $this->getMessagePrefix() . '-ldap-password' ),
+				'label-message' => new Message( $this->getMessagePrefix() . '-wiki-password' ),
 				'validation-callback' => [ $this, 'validatePassword' ],
 				'type' => 'password',
 				'required' => true
@@ -233,18 +240,23 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		];
 	}
 
-	public function validatePassword( ?string $password, array $data ) {
-		$username = $data['username'] ?? null;
+
+	public function validateUsername( ?string $username, array $data ) {
 		if ( empty( $username ) ) {
 			return new Message( $this->getMessagePrefix() . "-empty-username" );
 		}
 
+		return true;
+	}
+
+	public function validatePassword( ?string $password, array $data ) {
+		$username = $data['username'];
 		if ( empty( $password ) ) {
 			return new Message( $this->getMessagePrefix() . "-empty-password" );
 		}
 
-		$ldapClient = ClientFactory::getInstance()->getForDomain( $this->getDomain() );
-		if ( !$ldapClient->canBindAs( $username, $password ) ) {
+		$user = $this->checkLocalPassword( $username, $password );
+		if ( $user === null ) {
 			return new Message( $this->getMessagePrefix() . "-invalid-password" );
 		}
 		$this->setSession( "authenticated", ConvertibleTimestamp::now() );
@@ -252,13 +264,24 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		return true;
 	}
 
-	protected function getDomain(): string {
-		$domain = DomainConfigFactory::getInstance()->getConfiguredDomains();
+	/**
+	 * Return user if the authentication is successful, null otherwise.
+	 *
+	 * @param string $username
+	 * @param string $password
+	 * @return ?User
+	 * @see LDAPAuthentication2\PluggableAuth::checkLocalPassword()
+	 */
+	protected function checkLocalPassword( $username, $password ) {
+		$user = User::newFromName( $username );
+		$services = MediaWikiServices::getInstance();
+		$passwordFactory = $services->getPasswordFactory();
 
-		if ( count( $domain ) !== 1 ) {
-			throw new MWException( $this->getMessagePrefix() . "-only-one-domain" );
-		}
-		return $domain[0];
+		$dbr = $services->getDBLoadBalancer()->getConnection( DB_REPLICA );
+		$row = $dbr->selectRow( 'user', 'user_password', [ 'user_name' => $user->getName() ] );
+		$passwordInDB = $passwordFactory->newFromCiphertext( $row->user_password );
+
+		return $passwordInDB->verify( $password ) ? $user : null;
 	}
 
 	protected function restartForm(): void {
@@ -303,9 +326,9 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		return [
 			"message" => [
 				"type" => "info",
-				"raw" => true,
+				"rawrow" => true,
 				"default" => new Message(
-					$this->getMessagePrefix() . "-confirm-merge",
+					$this->getMessagePrefix() . "-confirm-wiki-merge",
 					[ $this->getUser(), $username ]
 				)
 			],
@@ -326,25 +349,25 @@ class SpecialLDAPMerge extends FormSpecialPage {
 			throw new IncompleteFormException();
 		}
 
-		$ldapUser = User::newFromName( $username );
-		if ( !$ldapUser || $ldapUser->getId() === 0 ) {
+		$wikiUser = User::newFromName( $username );
+		if ( !$wikiUser || $wikiUser->getId() === 0 ) {
 			throw new IncompleteFormException();
 		}
 
 		// We're saying the LDAP user is the "performer" since we're merging the two accounts
-		$um = new MergeUser( $this->getUser(), $ldapUser, new UserMergeLogger() );
-		$um->merge( $ldapUser, __METHOD__ );
+		$um = new MergeUser( $wikiUser, $this->getUser(), new UserMergeLogger() );
+		$um->merge( $this->getUser(), __METHOD__ );
 
 		$out = $this->getOutput();
 		$out->addWikiMsg(
 			'usermerge-success',
-			$this->getUser()->getName(), $this->getUser()->getId(),
-			$ldapUser->getName(), $ldapUser->getId()
+			$wikiUser->getName(), $wikiUser->getId(),
+			$this->getUser()->getName(), $this->getUser()->getId()
 		);
 
-		$failed = $um->delete( $this->getUser(), [ $this, 'msg' ] );
+		$failed = $um->delete( $wikiUser, [ $this, 'msg' ] );
 		$out->addWikiMsg(
-			'usermerge-userdeleted', $this->getUser()->getName(), $this->getUser()->getId()
+			'usermerge-userdeleted', $wikiUser->getName(), $wikiUser->getId()
 		);
 
 		if ( $failed ) {
@@ -364,14 +387,19 @@ class SpecialLDAPMerge extends FormSpecialPage {
 			}
 
 			$out->addHTML( Html::closeElement( 'ul' ) );
+
 		}
+
+		$status = UserStatus::singleton();
+		$status->setNotInProgress( $this->getUser() );
+		$status->setNotInWiki( $this->getUser() );
 
 		return [
 			"message" => [
 				"type" => "info",
-				"raw" => true,
+				"rawrow" => true,
 				"default" => new Message(
-					$this->getMessagePrefix() . "-merge-done"
+					$this->getMessagePrefix() . "-wiki-merge-done"
 				)
 			]
 		];

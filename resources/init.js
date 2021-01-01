@@ -3,7 +3,7 @@ $( "#wikitoldap-ldap-cancel" ).on( 'click', function() {
 	var returnTo = param.get( "returnto" );
 	var url = mw.util.getUrl( "Main Page" );
 
-	if ( returnTo.length ) {
+	if ( returnTo && returnTo.length ) {
 		url = mw.util.getUrl( returnTo );
 	}
 

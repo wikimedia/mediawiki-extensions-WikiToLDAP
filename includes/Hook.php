@@ -50,11 +50,12 @@ class Hook {
 	}
 
 	private static function getWizardPage( User $user ): ?Title {
-		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
+		$status = UserStatus::singleton();
 		$page = null;
-		if ( in_array( self::getGroup( Config::MIGRATION_GROUP ), $allGroups ) ) {
+		if ( $status->isWiki( $user ) ) {
 			$page = Title::makeTitleSafe( NS_SPECIAL, SpecialWikiMerge::PAGENAME );
-		} elseif( in_array( self::getGroup( Config::IN_PROGRESS_GROUP ), $allGroups ) ) {
+		}
+		if ( !$page && $status->isInProgress( $user ) ) {
 			$page = Title::makeTitleSafe( NS_SPECIAL, SpecialLDAPMerge::PAGENAME );
 		}
 		return $page;
@@ -111,18 +112,16 @@ class Hook {
 			return;
 		}
 
-		$id = $user->getId();
+		$status = UserStatus::singleton();
 		$username = $user->getName();
 
-		wfDebugLog( "wikitoldap", "Checking to see if we need to migrate $user..." );
-		$inProgressGroup = self::getGroup( Config::IN_PROGRESS_GROUP );
+		wfDebugLog( "wikitoldap", "Checking to see if we need to migrate $username..." );
 
 		# If they are not and never have been in the in-progress group, we need them in it.
-		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
-		if ( !in_array( $inProgressGroup, $allGroups ) ) {
-			$msg = "Added $username to $inProgressGroup";
-			if ( !$user->addGroup( $inProgressGroup ) ) {
-				$msg = "Trouble adding $username to $inProgressGroup";
+		if ( !$status->wasEverInProgress( $user ) ) {
+			$msg = "Setting $username to 'in progress'.";
+			if ( !$status->setInProgress( $user ) ) {
+				$msg = "Trouble setting $username to 'in progress'.";
 			}
 			wfDebugLog( "wikitoldap", $msg );
 		}

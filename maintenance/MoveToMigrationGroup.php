@@ -46,14 +46,14 @@ class MoveToMigrationGroup extends Maintenance {
 	}
 
 	public function execute() {
-		$conf = Config::newInstance();
-		$this->group = $conf->get( Config::MIGRATION_GROUP );
-
 		foreach ( $this->getUsers() as $user ) {
 			$this->moveToMigrationGroup( $user );
 		}
 	}
 
+	/**
+	 * Get an iterator for the users.
+	 */
 	protected function getUsers() :Countable {
 		$dbr = MediaWikiServices::getInstance()
 			 ->getDBLoadBalancer()->getMaintenanceConnectionRef( DB_REPLICA );
@@ -62,14 +62,20 @@ class MoveToMigrationGroup extends Maintenance {
 		);
 	}
 
+	/**
+	 * Move the user to the migration group
+	 */
 	protected function moveToMigrationGroup( User $user ) :void {
-		$groups = $user->getGroups();
-		if ( !in_array( $this->group, $groups ) ) {
-			$this->output( "Adding $user to {$this->group}... " );
-			$user->addGroup( $this->group );
-			$this->output( "done\n" );
+		$status = UserStatus::singleton();
+		if ( !$status->isWiki( $user ) ) {
+			$this->output( "Adding $user to migration group... " );
+			if ( $status->setIsWiki( $user ) ) {
+				$this->output( "done\n" );
+			} else {
+				$this->output( "error!\n" );
+			}
 		} else {
-			$this->output( "$user is already in {$this->group}.\n" );
+			$this->output( "$user is already in migration group.\n" );
 		}
 	}
 }

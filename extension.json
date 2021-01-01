@@ -4,36 +4,68 @@
 		"Mark A. Hershberger"
 	],
 	"url": "https://www.mediawiki.org/wiki/Extension:WikiToLDAP",
-	"descriptionmsg": "wikitoldap-desc",
-	"license-name": "GPL-3.0-or-later",
-	"type": "other",
+	"config_prefix": "WikiToLDAP",
+	"config": {
+		"MigrationGroup": {
+			"value": "wikitoldap-needs-migration",
+			"public": true,
+			"descriptionmsg": "wikitoldap-migrationgroup-desc"
+		},
+		"InProgressGroup": {
+			"value": "wikitoldap-in-progress",
+			"public": true,
+			"descriptionmsg": "wikitoldap-inprogressgroup-desc"
+		},
+		"MigrationInProgress": {
+			"value": true,
+			"public": true,
+			"descriptionmsg": "wikitoldap-migrationinprogress-desc"
+		}
+	},
 	"requires": {
 		"MediaWiki": ">= 1.34.0",
 		"extensions": {
 			"LDAPAuthentication2": ">= 1.0.2"
 		}
 	},
-	"AutoloadNamespaces": {
-		"MediaWiki\\Extension\\WikiToLDAP\\": "includes/"
-	},
 	"Hooks": {
 		"userCan": "MediaWiki\\Extension\\WikiToLDAP\\Hook::onUserCan",
-		"PluggableAuthPopulateGroups":
-		"MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthPopulateGroups"
+		"PluggableAuthPopulateGroups": "MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthPopulateGroups"
+	},
+	"callback": "MediaWiki\\Extension\\WikiToLDAP\\Hook::init",
+	"SpecialPages": {
+		"WikiUserMerge": "MediaWiki\\Extension\\WikiToLDAP\\SpecialWikiMerge",
+		"LDAPUserMerge": "MediaWiki\\Extension\\WikiToLDAP\\SpecialLDAPMerge"
+	},
+	"APIModules": {
+		"wikitoldapoptout": "MediaWiki\\Extension\\WikiToLDAP\\API"
 	},
 	"MessagesDirs": {
 		"WikiToLDAP": [
 			"i18n"
 		]
 	},
+	"AutoloadNamespaces": {
+		"MediaWiki\\Extension\\WikiToLDAP\\": "includes/"
+	},
 	"ResourceFileModulePaths": {
 		"localBasePath": "resources",
 		"remoteExtPath": "WikiToLDAP/resources"
 	},
-	"SpecialPages": {
-		"WikiUserMerge": "MediaWiki\\Extension\\WikiToLDAP\\SpecialWikiMerge",
-		"LDAPUserMerge": "MediaWiki\\Extension\\WikiToLDAP\\SpecialLDAPMerge"
+	"ResourceModules": {
+		"ext.WikiToLDAP": {
+			"scripts": [
+				"init.js"
+			]
+		}
 	},
+	"descriptionmsg": "wikitoldap-desc",
+	"license-name": "GPL-3.0-or-later",
+	"type": "other",
+    "LogTypes": [ "wikitoldap" ],
+    "LogActionsHandlers": {
+        "wikitoldap/*": "LogFormatter"
+    },
 	"GroupPermissions": {
 		"wikitoldap-in-progress": {
 			"migrate-from-ldap": true
@@ -149,28 +181,5 @@
 			"writeapi": true
 		}
 	},
-	"config_prefix": "WikiToLDAP",
-	"config": {
-		"MigrationGroup": {
-			"value": "wikitoldap-needs-migration",
-			"public": true,
-			"descriptionmsg": "wikitoldap-migrationgroup-desc"
-		},
-		"InProgressGroup": {
-			"value": "wikitoldap-in-progress",
-			"public": true,
-			"descriptionmsg": "wikitoldap-inprogressgroup-desc"
-		},
-		"MigrationInProgress": {
-			"value": true,
-			"public": true,
-			"descriptionmsg": "wikitoldap-migrationinprogress-desc"
-		}
-	},
-	"callback": "MediaWiki\\Extension\\WikiToLDAP\\Hook::init",
-    "LogTypes": [ "wikitoldap" ],
-    "LogActionsHandlers": {
-        "wikitoldap/*": "LogFormatter"
-    },
 	"manifest_version": 2
 }

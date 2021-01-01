@@ -146,6 +146,16 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		}
 	}
 
+	/**
+	 * The display format for HTMLForm
+	 */
+	protected function getDisplayFormat() {
+		return 'ooui';
+	}
+
+	/**
+	 * A standard message prefix
+	 */
 	public function getMessagePrefix() {
 		return "wikitoldap";
 	}
@@ -182,6 +192,8 @@ class SpecialLDAPMerge extends FormSpecialPage {
 	}
 
 	public function displayIntro(): array {
+		$this->getOutput()->addModules( "ext.WikiToLDAP" );
+
 		$this->submitButton = $this->getMessagePrefix() . "-ldap-continue";
 		return [
 			"message" => [

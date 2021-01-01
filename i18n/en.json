@@ -37,7 +37,7 @@
 	"wikitoldap-only-one-domain": "WikiToLDAP currently only works with one LDAP domain.",
 	"wikitoldap-invalid-password": "Invalid password, please try again",
 
-	"wikitoldap-ldap-cancel": "Skip this and go to wiki",
+	"wikitoldap-ldap-cancel": "Skip this and go back to the wiki",
 	"wikitoldap-ldap-continue": "Merge old wiki account",
 
 	"action-migrate-from-ldap": "migrate your account to an LDAP account",
@@ -46,5 +46,6 @@
 	"logentry-wikitoldap-redirect": "$1 {{GENDER:$2|was redirected}} to migrate {{GENDER:$2|his|her|their}} account when accessing $3",
 
 	"wikiusermerge": "Wiki user migration",
-	"ldapusermerge": "Merge old wiki accounts with LDAP accounts"
+	"ldapusermerge": "Merge old wiki accounts with LDAP accounts",
+	"apihelp-wikitoldapoptout-summary": "Internal method"
 }

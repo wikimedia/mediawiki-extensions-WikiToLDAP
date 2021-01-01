@@ -25,7 +25,6 @@ use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
 use Title;
 use User;
-use UserGroupMembership;
 
 class Hook {
 
@@ -121,15 +120,11 @@ class Hook {
 		# If they are not and never have been in the in-progress group, we need them in it.
 		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
 		if ( !in_array( $inProgressGroup, $allGroups ) ) {
-			$ugm = new UserGroupMembership( $id, $inProgressGroup );
-			$dbw = wfGetDB( DB_MASTER );
-			$dbw->startAtomic( __METHOD__ );
 			$msg = "Added $username to $inProgressGroup";
-			if ( $ugm->insert( $dbw ) === false ) {
+			if ( !$user->addGroup( $inProgressGroup ) ) {
 				$msg = "Trouble adding $username to $inProgressGroup";
 			}
 			wfDebugLog( "wikitoldap", $msg );
-			$dbw->endAtomic( __METHOD__ );
 		}
 	}
 }

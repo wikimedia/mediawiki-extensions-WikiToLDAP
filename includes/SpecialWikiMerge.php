@@ -146,6 +146,13 @@ class SpecialWikiMerge extends FormSpecialPage {
 		}
 	}
 
+	/**
+	 * The display format for HTMLForm
+	 */
+	protected function getDisplayFormat() {
+		return 'ooui';
+	}
+
 	public function getMessagePrefix() {
 		return "wikitoldap";
 	}

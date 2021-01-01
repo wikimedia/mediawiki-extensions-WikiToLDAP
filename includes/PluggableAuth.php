@@ -23,30 +23,31 @@ namespace MediaWiki\Extension\WikiToLDAP;
 use MediaWiki\Extension\LDAPAuthentication2\PluggableAuth as PluggableAuthBase;
 use MWException;
 use User;
-use UserGroupMembership;
 
 class PluggableAuth extends PluggableAuthBase {
 	protected $migrationGroup;
+	protected $inProgressGroup;
 
 	public function __construct() {
 		$config = Config::newInstance();
 		$this->migrationGroup = $config->get( Config::MIGRATION_GROUP );
+		$this->inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
 	}
 
 	/**
 	 * Adjust the groups for a user based on how it logged in.
 	 */
-	protected function fixupGroups( int $id, string $username ) {
-		$dbw = wfGetDB( DB_MASTER );
-		$group = UserGroupMembership::getMembershipsForUser( $id, $dbw );
-
-		if ( isset( $group[ $this->migrationGroup ] ) ) {
-			$sectionId = $dbw->startAtomic( __METHOD__ );
-			$msg = "Removed $username from $this->migrationGroup";
-			if ( $group[ $this->migrationGroup ]->delete( $dbw ) === false ) {
-				$msg = "Trouble removing $username from {$this->migrationGroup}";
+	protected function fixupGroups( User $user ) {
+		if ( in_array( $this->migrationGroup, $user->getGroups() ) ) {
+			$msg = "Removed $user from {$this->migrationGroup}";
+			if ( $user->removeGroup( $this->migrationGroup === false ) ) {
+				$msg = "Trouble removing $user from {$this->migrationGroup}";
 			}
-			$dbw->endAtomic( __METHOD__ );
+			wfDebugLog( "wikitoldap", $msg );
+			$msg = "Added $username to $this->inProgressGroup";
+			if ( !$user->addGroup( $this->inProgressGroup ) ) {
+				$msg = "Trouble adding $username to {$this->inProgressGroup}";
+			}
 			wfDebugLog( "wikitoldap", $msg );
 		}
 	}
@@ -91,8 +92,7 @@ class PluggableAuth extends PluggableAuthBase {
 
 		// Validate local user the mediawiki way
 		if ( $this->checkLocalPassword( $username, $password ) ) {
-			$id = $user->getId();
-			$this->fixupGroups( $id, $user->getName() );
+			$this->fixupGroups( $user );
 
 			wfDebugLog( "wikitoldap", "Successful local login for $username" );
 			return true;

@@ -1,3 +1,12 @@
+* Testing
+** New LDAP user
+- Test hexmode with fresh DB
+-
+** Wiki user with no LDAP
+** Wiki user with one LDAP
+** LDAP user with one WIKI
+** Wiki username same as LDAP
+
 * Redirecting users
 Since there does not appear to be a hook that can be used when permission is denied (i.e. the showPermissionsError function is called), we will use JS to show the error.
 

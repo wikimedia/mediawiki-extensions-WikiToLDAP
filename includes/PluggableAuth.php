@@ -82,11 +82,10 @@ class PluggableAuth extends PluggableAuthBase {
 			return null;
 		}
 
-		$allGroups = array_merge( $user->getFormerGroups(), $user->getGroups() );
-
 		// If they were never in the migration_group, they aren't a wiki user
-		if ( !in_array( $this->migrationGroup, $allGroups ) ) {
-			wfDebugLog( "wikitoldap", "$username was never in the {$this->migrationGroup}." );
+		$status = UserStatus::singleton();
+		if ( !$status->isWiki( $user ) ) {
+			wfDebugLog( "wikitoldap", "$username is not a wiki user." );
 			return null;
 		}
 

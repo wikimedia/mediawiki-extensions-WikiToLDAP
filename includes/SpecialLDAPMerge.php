@@ -26,12 +26,9 @@ use Exception;
 use FormSpecialPage;
 use Html;
 use HTMLForm;
-use MediaWiki\Extension\LDAPProvider\ClientFactory;
-use MediaWiki\Extension\LDAPProvider\DomainConfigFactory;
+use MediaWiki\MediaWikiServices;
 use MergeUser;
 use Message;
-use MediaWiki\MediaWikiServices;
-use MWException;
 use Status;
 use Title;
 use User;
@@ -240,7 +237,6 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		];
 	}
 
-
 	public function validateUsername( ?string $username, array $data ) {
 		if ( empty( $username ) ) {
 			return new Message( $this->getMessagePrefix() . "-empty-username" );
@@ -328,7 +324,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 				"type" => "info",
 				"rawrow" => true,
 				"default" => new Message(
-					$this->getMessagePrefix() . "-confirm-wiki-merge",
+					$this->getMessagePrefix() . "-confirm-ldap-merge",
 					[ $this->getUser(), $username ]
 				)
 			],
@@ -392,7 +388,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 
 		$status = UserStatus::singleton();
 		$status->setNotInProgress( $this->getUser() );
-		$status->setNotInWiki( $this->getUser() );
+		$status->setNotWiki( $this->getUser() );
 
 		return [
 			"message" => [

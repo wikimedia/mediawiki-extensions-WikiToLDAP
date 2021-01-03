@@ -21,7 +21,6 @@
 namespace MediaWiki\Extension\WikiToLDAP;
 
 use MediaWiki\Extension\LDAPAuthentication2\PluggableAuth as PluggableAuthBase;
-use MWException;
 use User;
 
 class PluggableAuth extends PluggableAuthBase {
@@ -40,13 +39,13 @@ class PluggableAuth extends PluggableAuthBase {
 	protected function fixupGroups( User $user ) {
 		if ( in_array( $this->migrationGroup, $user->getGroups() ) ) {
 			$msg = "Removed $user from {$this->migrationGroup}";
-			if ( $user->removeGroup( $this->migrationGroup === false ) ) {
+			if ( $user->removeGroup( $this->migrationGroup ) === false ) {
 				$msg = "Trouble removing $user from {$this->migrationGroup}";
 			}
 			wfDebugLog( "wikitoldap", $msg );
-			$msg = "Added $username to $this->inProgressGroup";
+			$msg = "Added $user to $this->inProgressGroup";
 			if ( !$user->addGroup( $this->inProgressGroup ) ) {
-				$msg = "Trouble adding $username to {$this->inProgressGroup}";
+				$msg = "Trouble adding $user to {$this->inProgressGroup}";
 			}
 			wfDebugLog( "wikitoldap", $msg );
 		}

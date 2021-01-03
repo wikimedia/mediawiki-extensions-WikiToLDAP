@@ -20,15 +20,15 @@
  */
 namespace MediaWiki\Extension\WikiToLDAP;
 
-use Countable;
 use Maintenance;
 use MediaWiki\MediaWikiServices;
+use Traversable;
 use User;
 use UserArrayFromResult;
 
 $IP = getenv( "MW_INSTALL_PATH" );
 if ( $IP === false ) {
-	$IP = "../..";
+	$IP = dirname( dirname( dirname( __DIR__ ) ) );
 }
 require "$IP/maintenance/Maintenance.php";
 
@@ -54,7 +54,7 @@ class MoveToMigrationGroup extends Maintenance {
 	/**
 	 * Get an iterator for the users.
 	 */
-	protected function getUsers() :Countable {
+	protected function getUsers() :Traversable {
 		$dbr = MediaWikiServices::getInstance()
 			 ->getDBLoadBalancer()->getMaintenanceConnectionRef( DB_REPLICA );
 		return new UserArrayFromResult(
@@ -67,15 +67,16 @@ class MoveToMigrationGroup extends Maintenance {
 	 */
 	protected function moveToMigrationGroup( User $user ) :void {
 		$status = UserStatus::singleton();
+		$esc = chr(27);
 		if ( !$status->isWiki( $user ) ) {
-			$this->output( "Adding $user to migration group... " );
+			$this->output( "Adding $user to migration group... {$esc}[K" );
 			if ( $status->setIsWiki( $user ) ) {
-				$this->output( "done\n" );
+				$this->output( "done\r" );
 			} else {
 				$this->output( "error!\n" );
 			}
 		} else {
-			$this->output( "$user is already in migration group.\n" );
+			$this->output( "$user is already in migration group.{$esc}[K\r" );
 		}
 	}
 }

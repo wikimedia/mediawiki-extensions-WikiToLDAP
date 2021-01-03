@@ -26,7 +26,7 @@
 	"wikitoldap-ldap-introduction": "====You can merge your LDAP-backed user with your old wiki account.====\nIf you do not have an old wiki account you can skip this process.  You may return to this page at any time in the future to merge an old wiki account.<br>",
 	"wikitoldap-select-account": "LDAP-backed username:",
 	"wikitoldap-ldap-password": "LDAP password:",
-	"wikitoldap-confirm-wiki-merge": "====You have successfully authenticated to the LDAP account <tt>$2</tt>.====\nIf you are ready to merge the account you are currently logged into (<tt>$1</tt>) into the LDAP-backed account (<tt>$2</tt>), submit this form.",
+	"wikitoldap-confirm-ldap-merge": "====You have successfully authenticated to the LDAP account <tt>$2</tt>.====\nIf you are ready to merge the account you are currently logged into (<tt>$1</tt>) into the LDAP-backed account (<tt>$2</tt>), submit this form.",
 	"wikitoldap-confirm-wiki-merge": "====You have successfully authenticated to the Wiki account <tt>$2</tt>.====\nIf you are ready to merge it into the this account (<tt>$1</tt>), submit this form.",
 	"wikitoldap-merge-not-needed": "==== You have successfully authenticated to a matching LDAP account.====\n",
 	"wikitoldap-merge-done": "==== This account has been merged and deleted. ====\nYou are no longer logged in.  Please log in using your LDAP account.",

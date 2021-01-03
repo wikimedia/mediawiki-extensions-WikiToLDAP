@@ -226,7 +226,6 @@ class SpecialWikiMerge extends FormSpecialPage {
 		];
 	}
 
-
 	public function validateUsername( ?string $username, array $data ) {
 		if ( empty( $username ) ) {
 			return new Message( $this->getMessagePrefix() . "-empty-username" );
@@ -321,7 +320,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 		}
 
 		$msg = new Message(
-			$this->getMessagePrefix() . "-confirm-merge", [ $this->getUser(), $username ]
+			$this->getMessagePrefix() . "-confirm-wiki-merge", [ $this->getUser(), $username ]
 		);
 		return [
 			"message" => [
@@ -355,13 +354,8 @@ class SpecialWikiMerge extends FormSpecialPage {
 			wfDebugLog( "wikitoldap", "Incomplete: $username/$authenticated/$confirmed" );
 			throw new IncompleteFormException();
 		}
-
-		exit();
+		$ldapUser = User::newFromName( $username );
 		$this->mergeUser( $ldapUser );
-		if ( $ldapUser && $ldapUser->getId() !== 0 ) {
-			$status = UserStatus::singleton();
-			if ( $status->isWikiUser( $ldapUser ) ) {}
-		}
 
 		$msg = new Message( $this->getMessagePrefix() . "-merge-done" );
 		return [

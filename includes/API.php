@@ -22,7 +22,6 @@
 namespace MediaWiki\Extension\WikiToLDAP;
 
 use ApiBase;
-use ApiResult;
 
 class API extends ApiBase {
 	public function execute() {

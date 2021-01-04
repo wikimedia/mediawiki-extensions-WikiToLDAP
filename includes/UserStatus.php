@@ -50,6 +50,13 @@ class UserStatus {
 	}
 
 	/**
+	 * Check if this user is one that needs to be migrated.
+	 */
+	public function isWiki( User $user ): bool {
+		return in_array( $this->migrationGroup, $user->getGroups() );
+	}
+
+	/**
 	 * Set this user as an original wiki user that needs to be migrated.
 	 */
 	public function setIsWiki( User $user ): bool {
@@ -80,14 +87,14 @@ class UserStatus {
 		$username = $user->getName();
 		if ( !$this->isWiki( $user ) ) {
 			wfDebugLog(
-				"wikitoldap", "$username not in {$this->migrationGroup} -- cannot remove!"
+				"wikitoldap", "$username not in migration group -- cannot remove!"
 			);
 			return true;
 		}
 
-		$msg = "Removed $username from {$this->migrationGroup}.";
+		$msg = "Removed $username from migration group.";
 		if ( $user->removeGroup( $this->migrationGroup ) === false ) {
-			$msg = "Trouble removing $username from {$this->migrationGroup}.";
+			$msg = "Trouble removing $username from migration group.";
 			$ret = false;
 		}
 		wfDebugLog( "wikitoldap", $msg );
@@ -96,10 +103,10 @@ class UserStatus {
 	}
 
 	/**
-	 * Check if this user is one that needs to be migrated.
+	 * Is this user in progress of being migrated right now?
 	 */
-	public function isWiki( User $user ): bool {
-		return in_array( $this->migrationGroup, $user->getGroups() );
+	public function isInProgress( User $user ): bool {
+		return in_array( $this->inProgressGroup, $user->getGroups() );
 	}
 
 	/**
@@ -107,9 +114,22 @@ class UserStatus {
 	 */
 	public function setInProgress( User $user ): bool {
 		$ret = true;
-		if ( !in_array( $this->inProgressGroup, $user->getGroups() ) ) {
-			$ret = $user->addGroup( $this->inProgressGroup );
+		$username = $user->getName();
+		if ( $this->isInProgress( $user ) ) {
+			wfDebugLog(
+				"wikitoldap", "$username is already in progress!"
+			);
+			return true;
 		}
+
+
+		$msg = "Adding $username to progress group.";
+		if ( $user->addGroup( $this->inProgressGroup ) === false ) {
+			$msg = "Trouble adding $username to progress group.";
+			$ret = false;
+		}
+		wfDebugLog( "wikitoldap", $msg );
+
 		return $ret;
 	}
 
@@ -121,14 +141,14 @@ class UserStatus {
 		$username = $user->getName();
 		if ( !$this->isInProgress( $user ) ) {
 			wfDebugLog(
-				"wikitoldap", "$username not in {$this->inProgressGroup} -- cannot remove!"
+				"wikitoldap", "$username not in progress -- cannot remove!"
 			);
 			return true;
 		}
 
-		$msg = "Removed $username from {$this->inProgressGroup}.";
+		$msg = "Removed $username from progress.";
 		if ( $user->removeGroup( $this->inProgressGroup ) === false ) {
-			$msg = "Trouble removing $username from {$this->inProgressGroup}.";
+			$msg = "Trouble removing $username from progress.";
 			$ret = false;
 		}
 		wfDebugLog( "wikitoldap", $msg );
@@ -171,12 +191,5 @@ class UserStatus {
 	 */
 	public function wasEverInProgress( User $user ): bool {
 		return in_array( $this->inProgressGroup, $this->getAllGroups( $user ) );
-	}
-
-	/**
-	 * Is this user in progress of being migrated right now?
-	 */
-	public function isInProgress( User $user ): bool {
-		return in_array( $this->inProgressGroup, $user->getGroups() );
 	}
 }

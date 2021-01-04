@@ -37,18 +37,8 @@ class PluggableAuth extends PluggableAuthBase {
 	 * Adjust the groups for a user based on how it logged in.
 	 */
 	protected function fixupGroups( User $user ) {
-		if ( in_array( $this->migrationGroup, $user->getGroups() ) ) {
-			$msg = "Removed $user from {$this->migrationGroup}";
-			if ( $user->removeGroup( $this->migrationGroup ) === false ) {
-				$msg = "Trouble removing $user from {$this->migrationGroup}";
-			}
-			wfDebugLog( "wikitoldap", $msg );
-			$msg = "Added $user to $this->inProgressGroup";
-			if ( !$user->addGroup( $this->inProgressGroup ) ) {
-				$msg = "Trouble adding $user to {$this->inProgressGroup}";
-			}
-			wfDebugLog( "wikitoldap", $msg );
-		}
+		$status = UserStatus::singleton();
+		$status->setInProgress( $user );
 	}
 
 	/**

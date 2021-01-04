@@ -72,6 +72,9 @@
         "wikitoldap/*": "LogFormatter"
     },
 	"GroupPermissions": {
+		"wikitoldap-needs-migration": {
+			"migrate-from-ldap": true
+		},
 		"wikitoldap-in-progress": {
 			"migrate-from-ldap": true
 		},

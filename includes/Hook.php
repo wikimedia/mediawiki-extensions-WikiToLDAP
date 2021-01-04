@@ -53,9 +53,11 @@ class Hook {
 		$status = UserStatus::singleton();
 		$page = null;
 		if ( $status->isWiki( $user ) ) {
+			wfDebugLog( "wikitoldap", "Old wiki user, will redirecto to Special::WikiMerge" );
 			$page = Title::makeTitleSafe( NS_SPECIAL, SpecialWikiMerge::PAGENAME );
 		}
 		if ( !$page && $status->isInProgress( $user ) ) {
+			wfDebugLog( "wikitoldap", "In progress user, will redirecto to Special::LDAPMerge" );
 			$page = Title::makeTitleSafe( NS_SPECIAL, SpecialLDAPMerge::PAGENAME );
 		}
 		return $page;

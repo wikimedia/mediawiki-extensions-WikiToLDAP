@@ -355,7 +355,13 @@ class SpecialWikiMerge extends FormSpecialPage {
 			throw new IncompleteFormException();
 		}
 		$ldapUser = User::newFromName( $username );
+		if ( $ldapUser->getId() === 0 ) {
+			$ldapUser = User::createNew( $username );
+		}
 		$this->mergeUser( $ldapUser );
+
+		$status = new UserStatus();
+		$status->setMerged( $user );
 
 		$msg = new Message( $this->getMessagePrefix() . "-merge-done" );
 		return [

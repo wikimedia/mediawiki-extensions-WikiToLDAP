@@ -122,7 +122,6 @@ class UserStatus {
 			return true;
 		}
 
-
 		$msg = "Adding $username to progress group.";
 		if ( $user->addGroup( $this->inProgressGroup ) === false ) {
 			$msg = "Trouble adding $username to progress group.";

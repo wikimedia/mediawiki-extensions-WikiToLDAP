@@ -27,6 +27,7 @@ class UserStatus {
 	private static $singleton = null;
 	protected $migrationGroup;
 	protected $inProgressGroup;
+	protected $mergedGroup;
 
 	public function __construct() {
 		$config = Config::newInstance();

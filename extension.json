@@ -79,7 +79,7 @@
 			"migrate-from-ldap": true
 		},
 		"wikitoldap-merged": {
-			"migrate-from-ldap": false
+			"migrate-from-ldap": true
 		}
 	},
 	"RevokePermissions": {

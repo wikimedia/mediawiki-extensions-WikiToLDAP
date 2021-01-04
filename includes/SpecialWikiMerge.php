@@ -94,23 +94,43 @@ class SpecialWikiMerge extends FormSpecialPage {
 	protected $session;
 
 	public function __construct( $par = "" ) {
+		$this->handleAnon();
+
+		$this->session = $this->getRequest()->getSession();
+		$this->session->persist();
+
+		$this->setupStepMap();
+	}
+
+	public function execute( $par ) {
+		$status = UserStatus::singleton();
+		if ( !$status->isWiki( $this->getUser() ) ) {
+			$this->getOutput()->redirect( Title::newMainPage()->getFullURL() );
+			return;
+		}
+
+		$this->setReturnto();
+		parent::execute( $par );
+	}
+
+	protected function handleAnon(): void {
 		// After the user merge, they end up back here, but they're anonymous.
 		// So we'll send them to the front page.
 		if ( $this->getUser()->isAnon() ) {
-			$this->getOutput()->redirect( Title::newMainPage()->getFullURL() );
 			parent::__construct( self::PAGENAME );
 		} else {
 			parent::__construct( self::PAGENAME, 'migrate-from-ldap' );
 		}
-		$this->session = $this->getRequest()->getSession();
-		$this->session->persist();
+	}
 
-		$return = $this->getRequest()->getVal( "returnto" );
-		if ( $return ) {
+	protected function setReturnto(): void {
+		if ( !$this->getSession( "returnto" ) ) {
+			$return = $this->getRequest()->getVal( "returnto" );
+			if ( !$return ) {
+				$return = Title::newMainPage()->getPrefixedDBKey();
+			}
 			$this->setSession( "returnto", $return );
 		}
-
-		$this->setupStepMap();
 	}
 
 	protected function isValidMethod( string $method ): bool {
@@ -358,10 +378,13 @@ class SpecialWikiMerge extends FormSpecialPage {
 		if ( $ldapUser->getId() === 0 ) {
 			$ldapUser = User::createNew( $username );
 		}
+		if ( $ldapUser === null ) {
+			throw new MWException( "Couldn't create a user for $username!" );
+		}
 		$this->mergeUser( $ldapUser );
 
 		$status = new UserStatus();
-		$status->setMerged( $user );
+		$status->setMerged( $ldapUser );
 
 		$msg = new Message( $this->getMessagePrefix() . "-merge-done" );
 		return [

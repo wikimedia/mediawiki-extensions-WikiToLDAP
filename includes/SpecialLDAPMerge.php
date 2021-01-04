@@ -92,23 +92,43 @@ class SpecialLDAPMerge extends FormSpecialPage {
 	protected $session;
 
 	public function __construct( $par = "" ) {
-		// After the user merge, they end up back here, but they're anonymous.
-		// So we'll send them to the front page.
-		if ( $this->getUser()->isAnon() ) {
-			$this->getOutput()->redirect( Title::newMainPage()->getFullURL() );
-			parent::__construct( self::PAGENAME );
-		} else {
-			parent::__construct( self::PAGENAME );
-		}
+		$this->handleAnon();
+
 		$this->session = $this->getRequest()->getSession();
 		$this->session->persist();
 
-		$return = $this->getRequest()->getVal( "returnto" );
-		if ( $return ) {
-			$this->setSession( "returnto", $return );
+		$this->setupStepMap();
+	}
+
+	public function execute( $par ) {
+		$status = UserStatus::singleton();
+		if ( $status->isWiki( $this->getUser() ) ) {
+			$this->getOutput()->redirect( Title::newMainPage()->getFullURL() );
+			return;
 		}
 
-		$this->setupStepMap();
+		$this->setReturnto();
+		parent::execute( $par );
+	}
+
+	protected function handleAnon(): void {
+		// After the user merge, they end up back here, but they're anonymous.
+		// So we'll send them to the front page.
+		if ( $this->getUser()->isAnon() ) {
+			parent::__construct( self::PAGENAME );
+		} else {
+			parent::__construct( self::PAGENAME, 'migrate-from-ldap' );
+		}
+	}
+
+	protected function setReturnto(): void {
+		if ( !$this->getSession( "returnto" ) ) {
+			$return = $this->getRequest()->getVal( "returnto" );
+			if ( !$return ) {
+				$return = Title::newMainPage()->getPrefixedDBKey();
+			}
+			$this->setSession( "returnto", $return );
+		}
 	}
 
 	protected function isValidMethod( string $method ): bool {

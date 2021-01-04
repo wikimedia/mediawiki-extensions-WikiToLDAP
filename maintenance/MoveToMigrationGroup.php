@@ -67,7 +67,7 @@ class MoveToMigrationGroup extends Maintenance {
 	 */
 	protected function moveToMigrationGroup( User $user ) :void {
 		$status = UserStatus::singleton();
-		$esc = chr(27);
+		$esc = chr( 27 );
 		if ( !$status->isWiki( $user ) ) {
 			$this->output( "Adding $user to migration group... {$esc}[K" );
 			if ( $status->setIsWiki( $user ) ) {

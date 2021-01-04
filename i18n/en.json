@@ -32,7 +32,7 @@
 	"wikitoldap-ldap-password": "LDAP password:",
 	"wikitoldap-confirm-ldap-merge": "====You have successfully authenticated to the Wiki account <tt>$2</tt>.====\nWhen you are ready to to merge this account into the one you are currently logged into (<tt>$1</tt>), submit this form. After this is done you will no longer be able to log into the <tt>$2</tt> account.",
 	"wikitoldap-confirm-wiki-merge": "====You have successfully authenticated to the LDAP account <tt>$2</tt>.====\nWhen you are ready to merge your wiki account (<tt>$1</tt>) into the the LDAP account (<tt>$2</tt>), submit this form.\n\nYou will need to use the LDAP account to log in in the future, but it will have all the edits made by this account in its edit history.  Your watchlist will carry over to that account.",
-	"wikitoldap-merge-not-needed": "==== You have successfully authenticated to a matching LDAP account.====\n",
+	"wikitoldap-merge-not-needed": "==== You have successfully authenticated to a matching LDAP account.====\nYou will need to use your LDAP credentials to log in from now on.",
 	"wikitoldap-merge-done": "==== This account has been merged and deleted. ====\nYou are no longer logged in.  Please log in using your LDAP account.",
 	"wikitoldap-wiki-merge-done": "==== The wiki account has been merged and deleted. ====",
 	"wikitoldap-continue": "continue",

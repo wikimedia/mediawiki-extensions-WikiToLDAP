@@ -32,6 +32,7 @@ class UserStatus {
 		$config = Config::newInstance();
 		$this->migrationGroup = $config->get( Config::MIGRATION_GROUP );
 		$this->inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
+		$this->mergedGroup = $config->get( Config::MERGED_GROUP );
 	}
 
 	public static function singleton(): self {
@@ -128,6 +129,36 @@ class UserStatus {
 		$msg = "Removed $username from {$this->inProgressGroup}.";
 		if ( $user->removeGroup( $this->inProgressGroup ) === false ) {
 			$msg = "Trouble removing $username from {$this->inProgressGroup}.";
+			$ret = false;
+		}
+		wfDebugLog( "wikitoldap", $msg );
+
+		return $ret;
+	}
+
+	/**
+	 * Check if this user has had a merge completed (is LDAP backed)
+	 */
+	public function isMerged( User $user ): bool {
+		return in_array( $this->mergedGroup, $user->getGroups() );
+	}
+
+	/**
+	 * Set this user as having completed a merge (or not needing one).
+	 */
+	public function setMerged( User $user ): bool {
+		$ret = true;
+		$username = $user->getName();
+		if ( $this->isMerged( $user ) ) {
+			wfDebugLog(
+				"wikitoldap", "$username is already merged!"
+			);
+			return true;
+		}
+
+		$msg = "Adding $username to {$this->mergedGroup}.";
+		if ( $user->addGroup( $this->mergedGroup ) === false ) {
+			$msg = "Trouble adding $username to {$this->mergedGroup}.";
 			$ret = false;
 		}
 		wfDebugLog( "wikitoldap", $msg );

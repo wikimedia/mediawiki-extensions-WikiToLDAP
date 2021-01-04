@@ -81,8 +81,17 @@ class PluggableAuth extends PluggableAuthBase {
 			return null;
 		}
 
-		// If they were never in the migration_group, they aren't a wiki user
 		$status = UserStatus::singleton();
+		wfDebugLog( "wikitoldap", "$username merged? " . $status->isMerged( $user ) );
+		// If they are designated merged, they are't a wiki user
+		if ( $status->isMerged( $user ) ) {
+			# HACK!! The user merge copies over the wiki group after we can make adjustments, so we fix it here.
+			$status->setNotWiki( $user );
+			wfDebugLog( "wikitoldap", "$username has been merged not a wiki user." );
+			return null;
+		}
+
+		// If they were never in the migration_group, they aren't a wiki user
 		if ( !$status->isWiki( $user ) ) {
 			wfDebugLog( "wikitoldap", "$username is not a wiki user." );
 			return null;

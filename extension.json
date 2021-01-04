@@ -16,6 +16,11 @@
 			"public": true,
 			"descriptionmsg": "wikitoldap-inprogressgroup-desc"
 		},
+		"MergedGroup": {
+			"value": "wikitoldap-merged",
+			"public": true,
+			"descriptionmsg": "wikitoldap-merged-desc"
+		},
 		"MigrationInProgress": {
 			"value": true,
 			"public": true,
@@ -69,6 +74,9 @@
 	"GroupPermissions": {
 		"wikitoldap-in-progress": {
 			"migrate-from-ldap": true
+		},
+		"wikitoldap-merged": {
+			"migrate-from-ldap": false
 		}
 	},
 	"RevokePermissions": {

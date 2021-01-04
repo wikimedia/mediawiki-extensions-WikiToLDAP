@@ -30,6 +30,9 @@ class API extends ApiBase {
 			return true;
 		}
 
-		return UserStatus::singleton()->setNotInProgress( $this->getUser() );
+		$status = UserStatus::singleton();
+		$status->setMerged( $this->getUser() );
+		$status->setNotWiki( $this->getUser() );
+		return $status->setNotInProgress( $this->getUser() );
 	}
 }

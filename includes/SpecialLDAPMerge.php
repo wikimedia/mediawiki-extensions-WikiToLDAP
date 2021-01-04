@@ -388,7 +388,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 
 		$status = UserStatus::singleton();
 		$status->setNotInProgress( $this->getUser() );
-		$status->setNotWiki( $this->getUser() );
+		$status->setMerged( $this->getUser() );
 
 		return [
 			"message" => [

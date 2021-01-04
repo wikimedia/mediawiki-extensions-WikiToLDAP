@@ -1,10 +1,13 @@
 * Testing
 ** New LDAP user
 - Test hexmode with fresh DB
--
+- Taken to Merge
+- Specified no merge
+- Put in merged group
 ** Wiki user with no LDAP
 ** Wiki user with one LDAP
 ** LDAP user with one WIKI
+- Tested with hexmode merging with MarkAHershberger
 ** Wiki username same as LDAP
 
 * Redirecting users

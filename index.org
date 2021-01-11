@@ -11,5 +11,8 @@ The initial development of this extension was funded by [[https://www.osgeo.org/
 * Installation
 This extension uses the new (as of early 2021) [[https://www.mediawiki.org/wiki/Composer/For_extensions][Composer for extensions]] guidance to install the extension.
 
-This means that to install the extension you need to install composer and run the following To download the extension, run the following command from the comma
+This means that to install the extension you need to install composer and run the following To download the extension, run the following command from the command line in your wiki's top-level directory (/i.e./ the one that contains the =LocalSettings.php= file) :
+#+begin_src bash
+$ COMPOSER=composer.local.json php ( touch $COMPOSER && composer.phar require --no-update mediawiki/wiki-to-ldap )
+#+end_src
 * Configuration

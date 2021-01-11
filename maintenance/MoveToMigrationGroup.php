@@ -22,6 +22,7 @@ namespace MediaWiki\Extension\WikiToLDAP;
 
 use Maintenance;
 use MediaWiki\MediaWikiServices;
+use RenameuserSQL;
 use Traversable;
 use User;
 use UserArrayFromResult;
@@ -35,13 +36,24 @@ require "$IP/maintenance/Maintenance.php";
 $maintClass = MoveToMigrationGroup::class;
 class MoveToMigrationGroup extends Maintenance {
 	private /** @var Config */ $config;
-	private /** @var string */ $group;
+	private /** @var string */ $prefix;
+	private /** @var int */ $prefLen;
 
 	public function __construct() {
 		parent::__construct();
+		$this->requireExtension( 'Renameuser' );
+		$this->requireExtension( 'WikiToLDAP' );
+		$this->config = Config::newInstance();
+		$this->prefix = $this->config->get( Config::OLD_USER_PREFIX );
+		$this->prefLen = strlen( $prefLen );
 
 		$this->addDescription(
 			"Put all users in the LDAPMigration group."
+		);
+
+		$this->addOption(
+			'rename', 'Also rename all users using the configured prefix. Current prefix: '
+			. $this->prefix, false, false, 'r'
 		);
 	}
 
@@ -75,9 +87,44 @@ class MoveToMigrationGroup extends Maintenance {
 			} else {
 				$this->output( "error!\n" );
 			}
+
+			$oldname = $user->getName();
+			if ( $this->hasOption( 'rename' ) ) {
+				if ( substr( $oldname, 0, $this->prefixLen ) !== $this->prefix ) {
+					$renamed = $this->prefix . $oldname;
+					$this->output( "Renaming user '$oldname' to '$renamed'... {$esc}[K" );
+					if ( $this->renameThisUser( $user,  $renamed ) ) {
+						$this->output( "done\r" );
+					} else {
+						$this->output( "error\n" );
+					}
+				}
+			}
 		} else {
 			$this->output( "$user is already in migration group.{$esc}[K\r" );
 		}
 	}
+
+	/**
+	 * Handle renaming the user and any errors.
+	 */
+	protected function renameThisUser( User $user, string $newname ) {
+		$oldname = $user->getName();
+
+		'@phan-var User $performer';
+		$renameJob = new RenameuserSQL(
+			$user->getName(),
+			$newname,
+			$user->getId(),
+			$this->performer,
+			[
+				'reason' => $this->getOption( 'reason' )
+			]
+		);
+
+		return $renameJob->rename();
+	}
+
+
 }
 require_once RUN_MAINTENANCE_IF_MAIN;

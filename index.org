@@ -1,46 +1,15 @@
-* Process
-** Log in
-:PROPERTIES:
-:ID:       6fb66776-4c62-46bf-9a97-6e84a82e16f4
-:END:
-[[file:data/6f/b66776-4c62-46bf-9a97-6e84a82e16f4/screenshot-20201220-001326.png]]
+#+TITLE: WikiToLDAP
+#+SUBTITLE: An extension to help migrate wiki users to an LDAP-backed account
 
-If the account name is the same as their LDAP account, they just need to log out and log back in using LDAP (the “Log in with LDAP” button at login”) and no further action is needed.
-User is immediately taken to the migration page.
-[[file:data/6f/b66776-4c62-46bf-9a97-6e84a82e16f4/screenshot-20201220-002548.png]]
-User sees they need to create their LDAP account.
+The initial development of this extension was funded by [[https://www.osgeo.org/][The Open Source Geospatial Foundation]] to help migrate their wiki users from MediaWiki-only user accounts to their centralized, LDAP-backed [[https://www.osgeo.org/community/getting-started-osgeo/osgeo_userid/][OSGeo Services UserID]].  The intent is to merge existing wiki accounts with LDAP-backed accounts using the [[https://www.mediawiki.org/wiki/Extension:UserMerge][UserMerge extension]].  There are two SpecialPages to handle this: Special:WikiUserMerge and Special:LDAPUserMerge. Because of the requirements for OSGeo, more work has been done on the Special:LDAPUserMerge workflow, but the other one should work as well.
 
-** User logs in with an LDAP account
-** User logs out and logs back in with their previous account.
-** User clicks “next page”
-:PROPERTIES:
-:ID:       d6418337-dff7-4654-b747-e184e51bf506
-:END:
+* Prerequisites
+- *A test wiki.* You'll want to test the entire workflow before you deploy to production it since authentication is a critical part of the wiki.
+- *Set up the [[https://www.mediawiki.org/wiki/Extension:LDAPAuthentication2][LDAPAuthentication2 extension]].* This depends on at least [[https://www.mediawiki.org/wiki/Extension:PluggableAuth][PluggableAuth]] and [[https://www.mediawiki.org/wiki/Extension:LDAPProvider][LDAPProvider]].  You should ensure that users can log in using their LDAP credentials before proceding.
+- *Enable the [[https://www.mediawiki.org/wiki/Extension:UserMerge][UserMerge extension]].* WikiToLDAP uses the merge capability of the UserMerge to handle the actual merging of users.
+- *Enable the [[https://www.mediawiki.org/wiki/Extension:Renameuser][Renameuser extension]].* This is not strictly required, but the workflow outlined here depends on it.  If you use the merge method described in this documentation, you'll need this extension installed.
+* Installation
+This extension uses the new (as of early 2021) [[https://www.mediawiki.org/wiki/Composer/For_extensions][Composer for extensions]] guidance to install the extension.
 
-They provide a username to merge into:
-
-[[file:data/d6/418337-dff7-4654-b747-e184e51bf506/screenshot-20201220-010400.png]]
-
-The usernames offered are only those that already exist in the wiki.  This is why they are asked to log in with their LDAP account first.
-
-** prompted for password
-:PROPERTIES:
-:ID:       45961f69-5b5b-4f7d-95cf-32825767f253
-:END:
-
-[[file:data/45/961f69-5b5b-4f7d-95cf-32825767f253/screenshot-20201220-010801.png]]
-
-** Agree to merge
-:PROPERTIES:
-:ID:       426e2147-36e0-40f6-a091-af1648dd5c7a
-:END:
-
-[[file:data/42/6e2147-36e0-40f6-a091-af1648dd5c7a/screenshot-20201220-003217.png]]
-** Merge Complete
-:PROPERTIES:
-:ID:       74555186-2817-40f2-82f2-d15f451a3333
-:END:
-
-Merge is complete. Click “continue” and they'll be taken back to the main page of the wiki.
-
-[[file:data/74/555186-2817-40f2-82f2-d15f451a3333/screenshot-20201220-010935.png]]
+This means that to install the extension you need to install composer and run the following To download the extension, run the following command from the comma
+* Configuration

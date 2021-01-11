@@ -21,6 +21,11 @@
 			"public": true,
 			"descriptionmsg": "wikitoldap-merged-desc"
 		},
+		"OldUsernamePrefix": {
+			"value": "Wiki-",
+			"public": true,
+			"descriptionmsg": "wikitoldap-old-username-prefix-desc"
+		},
 		"MigrationInProgress": {
 			"value": true,
 			"public": true,

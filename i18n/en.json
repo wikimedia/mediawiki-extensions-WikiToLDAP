@@ -9,6 +9,7 @@
 
 	"wikitoldap-migrationgroup-desc": "The group users are put into before any migration is attempted.",
 	"wikitoldap-inprogressgroup-desc": "The group users are put into after they log in and migration has started.",
+	"wikitoldap-old-username-prefix": "The prefix the old wiki accounts have.  You can use the maintenance script 'renameWikiUsers.php' to rename all current wiki users with this prefix.",
 	"wikitoldap-migrationinprogress-desc": "Whether any migration is currently in progress.  If false, defaults to behaving just like [https://www.mediawiki.org/wiki/Extension:LDAPAuthentication2 LDAPAuthentication2].",
 
 	"group-wikitoldap-needs-migration": "Old wiki accounts",

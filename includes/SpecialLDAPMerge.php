@@ -244,6 +244,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 				'size' => 30,
 				'type' => 'user',
 				'autofocus' => true,
+				'filter-callback' => [ $this, 'prefixUsername' ],
 				'validation-callback' => [ $this, 'validateUsername' ],
 				'default' => $this->getSession( "user" ),
 				'required' => true
@@ -255,6 +256,15 @@ class SpecialLDAPMerge extends FormSpecialPage {
 				'required' => true
 			]
 		];
+	}
+
+	public function prefixUsername( ?string $username, array $data ) {
+		if ( $username ) {
+			$config = Config::newInstance();
+			$prefix = $config->get( Config::OLD_USER_PREFIX );
+
+			return "$prefix$userame";
+		}
 	}
 
 	public function validateUsername( ?string $username, array $data ) {
@@ -288,7 +298,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 	 * @return ?User
 	 * @see LDAPAuthentication2\PluggableAuth::checkLocalPassword()
 	 */
-	protected function checkLocalPassword( $username, $password ) {
+	protected function checkLocalPassword( string $username, string $password ) {
 		$user = User::newFromName( $username );
 		$services = MediaWikiServices::getInstance();
 		$passwordFactory = $services->getPasswordFactory();

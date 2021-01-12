@@ -1,6 +1,6 @@
 .SILENT:
 
-DOC: index.pdf
+DOC: README.pdf
 
 test:
 	composer test

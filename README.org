@@ -13,6 +13,11 @@ This extension uses the new (as of early 2021) [[https://www.mediawiki.org/wiki/
 
 This means that to install the extension you need to install composer and run the following To download the extension, run the following command from the command line in your wiki's top-level directory (/i.e./ the one that contains the =LocalSettings.php= file) :
 #+begin_src bash
-$ COMPOSER=composer.local.json php ( touch $COMPOSER && composer.phar require --no-update mediawiki/wiki-to-ldap )
+  $ COMPOSER=composer.local.json php ( touch $COMPOSER && \
+										composer.phar require --no-update mediawiki/wiki-to-ldap )
+#+end_src
+After this, you'll need to enable the extension by adding the following to your =LocalSettings.php= file:
+#+begin_src php
+wfLoadExtension( 'WikiToLDAP' );
 #+end_src
 * Configuration

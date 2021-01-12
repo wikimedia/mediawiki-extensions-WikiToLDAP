@@ -263,7 +263,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 			$config = Config::newInstance();
 			$prefix = $config->get( Config::OLD_USER_PREFIX );
 
-			return "$prefix$userame";
+			return "$prefix$username";
 		}
 	}
 

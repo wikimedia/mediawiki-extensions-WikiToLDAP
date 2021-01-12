@@ -37,7 +37,8 @@ $maintClass = MoveToMigrationGroup::class;
 class MoveToMigrationGroup extends Maintenance {
 	private /** @var Config */ $config;
 	private /** @var string */ $prefix;
-	private /** @var int */ $prefLen;
+	private /** @var int */ $prefixLen;
+	private /** @var User */ $performer;
 
 	public function __construct() {
 		parent::__construct();
@@ -45,7 +46,8 @@ class MoveToMigrationGroup extends Maintenance {
 		$this->requireExtension( 'WikiToLDAP' );
 		$this->config = Config::newInstance();
 		$this->prefix = $this->config->get( Config::OLD_USER_PREFIX );
-		$this->prefLen = strlen( $prefLen );
+		$this->prefixLen = strlen( $this->prefix );
+		$this->performer = User::newSystemUser( 'Maintenance script', [ 'steal' => true ] );
 
 		$this->addDescription(
 			"Put all users in the LDAPMigration group."
@@ -111,7 +113,6 @@ class MoveToMigrationGroup extends Maintenance {
 	protected function renameThisUser( User $user, string $newname ) {
 		$oldname = $user->getName();
 
-		'@phan-var User $performer';
 		$renameJob = new RenameuserSQL(
 			$user->getName(),
 			$newname,
@@ -124,7 +125,6 @@ class MoveToMigrationGroup extends Maintenance {
 
 		return $renameJob->rename();
 	}
-
 
 }
 require_once RUN_MAINTENANCE_IF_MAIN;

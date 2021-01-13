@@ -21,3 +21,18 @@ After this, you'll need to enable the extension by adding the following to your 
 wfLoadExtension( 'WikiToLDAP' );
 #+end_src
 * Configuration
+As with most other MediaWiki extensions, this extension is configured by setting PHP variables in the =LocalSettings.php= file.  The settings are all prefixed with =WikiToLDAP= so the =MigrationInProgress= setting below would be set by adding the following line to the =LocalSettings.php=:
+#+begin_src php
+$WikiToLDAPMigrationInProgress = false;
+#+end_src
+
+| Setting             | Default                    | Description |
+|---------------------+----------------------------+-------------|
+| MigrationGroup      | wikitoldap-needs-migration |             |
+| InProgressGroup     | wikitoldap-in-progress     |             |
+| MergedGroup         | wikitoldap-merged          |             |
+| OldUserNamePrefix   | Wiki-                      |             |
+| MigrationInProgress | true                       |             |
+
+* Documentation
+A PDF version of this documentation can be produced by running =make= at the command line.  It requires Emacs and LaTeX be installed as well and will complain if they aren't.

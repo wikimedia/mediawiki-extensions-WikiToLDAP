@@ -26,13 +26,14 @@ As with most other MediaWiki extensions, this extension is configured by setting
 $WikiToLDAPMigrationInProgress = false;
 #+end_src
 
-| Setting             | Default                    | Description |
-|---------------------+----------------------------+-------------|
-| MigrationGroup      | wikitoldap-needs-migration |             |
-| InProgressGroup     | wikitoldap-in-progress     |             |
-| MergedGroup         | wikitoldap-merged          |             |
-| OldUserNamePrefix   | Wiki-                      |             |
-| MigrationInProgress | true                       |             |
+| Setting             | Default                    | Description                                                                                                                                         |
+|---------------------+----------------------------+-----------------------------------------------------------------------------------------------------------------------------------------------------|
+| MigrationGroup      | wikitoldap-needs-migration | The group old wiki users are put into before any migration is attempted.                                                                            |
+| InProgressGroup     | wikitoldap-in-progress     | The group users are put into after they log in and migration has started.                                                                           |
+| MergedGroup         | wikitoldap-merged          | The group for users who have gone through WikiToLDAP's merge process.                                                                               |
+| OldUserNamePrefix   | Wiki-                      | The prefix the old wiki accounts have.  You can use the maintenance script 'renameWikiUsers.php' to rename all current wiki users with this prefix. |
+| MigrationInProgress | true                       | Whether any migration is currently in progress.  If false, defaults to behaving just like [[https://www.mediawiki.org/wiki/Extension:LDAPAuthentication2][LDAPAuthentication2]].                                      |
+
 
 * Documentation
 A PDF version of this documentation can be produced by running =make= at the command line.  It requires Emacs and LaTeX be installed as well and will complain if they aren't.

@@ -7,9 +7,10 @@
 	"wikitoldap-desc": "Wiki to LDAP account conversion",
 	"wikitoldap-group": "Wiki to LDAP group for account migration",
 
-	"wikitoldap-migrationgroup-desc": "The group users are put into before any migration is attempted.",
+	"wikitoldap-migrationgroup-desc": "The group old wiki users are put into before any migration is attempted.",
 	"wikitoldap-inprogressgroup-desc": "The group users are put into after they log in and migration has started.",
-	"wikitoldap-old-username-prefix": "The prefix the old wiki accounts have.  You can use the maintenance script 'renameWikiUsers.php' to rename all current wiki users with this prefix.",
+	"wikitoldap-old-username-prefix-desc": "The prefix the old wiki accounts have.  You can use the maintenance script 'renameWikiUsers.php' to rename all current wiki users with this prefix.",
+	"wikitoldap-merged-desc": "The group for users who have gone through WikiToLDAP's merge process.",
 	"wikitoldap-migrationinprogress-desc": "Whether any migration is currently in progress.  If false, defaults to behaving just like [https://www.mediawiki.org/wiki/Extension:LDAPAuthentication2 LDAPAuthentication2].",
 
 	"group-wikitoldap-needs-migration": "Old wiki accounts",

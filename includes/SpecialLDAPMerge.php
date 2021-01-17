@@ -11,11 +11,11 @@
  *
  * This program is distributed in the hope that it will be useful,
  * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.	 See the
  * GNU General Public License for more details.
  *
  * You should have received a copy of the GNU General Public License
- * along with this program.  If not, see <http://www.gnu.org/licenses/>.
+ * along with this program.	 If not, see <http://www.gnu.org/licenses/>.
  *
  * @author Mark A. Hershberger <mah@nichework.com>
  */
@@ -102,7 +102,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 
 	public function execute( $par ) {
 		$status = UserStatus::singleton();
-		if ( $status->isWiki( $this->getUser() ) ) {
+		if ( $status->isWiki( $this->getUser() ) && !$status->isMerged( $this->getUser() ) ) {
 			$this->getOutput()->redirect( Title::newMainPage()->getFullURL() );
 			return;
 		}
@@ -238,33 +238,52 @@ class SpecialLDAPMerge extends FormSpecialPage {
 	 */
 	public function selectAccount(): array {
 		$this->submitButton = "next";
-		return [
-			'username' => [
-				'label-message' => $this->getMessagePrefix() . '-select-wiki-account',
-				'size' => 30,
-				'type' => 'user',
-				'autofocus' => true,
-				'filter-callback' => [ $this, 'prefixUsername' ],
-				'validation-callback' => [ $this, 'validateUsername' ],
-				'default' => $this->getSession( "user" ),
-				'required' => true
-			],
-			'password' => [
-				'label-message' => new Message( $this->getMessagePrefix() . '-wiki-password' ),
-				'validation-callback' => [ $this, 'validatePassword' ],
-				'type' => 'password',
-				'required' => true
-			]
+		$config = Config::newInstance();
+		$prefix = $config->get( Config::OLD_USER_PREFIX );
+		$renamed = $config->get( Config::OLD_USERS_ARE_RENAMED );
+		$ret['message'] = [
+			"type" => "info",
+			"rawrow" => true,
+			"default" => new Message( $this->getMessagePrefix() . "-select-wiki-instructions", [ $prefix ] )
 		];
+		if ( $renamed ) {
+			$ret['message'] = [
+				"type" => "info",
+				"rawrow" => true,
+				"default" => new Message( $this->getMessagePrefix() . "-select-renamed-wiki-instructions", [ $prefix ] )
+			];
+		}
+		$ret['username'] = [
+			'label-message' => $this->getMessagePrefix() . '-select-wiki-account',
+			'size' => 30,
+			'type' => 'user',
+			'autofocus' => true,
+			'filter-callback' => [ $this, 'prefixUsername' ],
+			'validation-callback' => [ $this, 'validateUsername' ],
+			'default' => $this->getSession( "user" ),
+			'required' => true
+		];
+		$ret['password'] = [
+			'label-message' => new Message( $this->getMessagePrefix() . '-wiki-password' ),
+			'validation-callback' => [ $this, 'validatePassword' ],
+			'type' => 'password',
+			'required' => true
+		];
+        return $ret;
 	}
 
-	public function prefixUsername( ?string $username, array $data ) {
+	public function prefixUsername( ?string $username, array $data ): ?string {
+		$ret = $username;
 		if ( $username ) {
 			$config = Config::newInstance();
 			$prefix = $config->get( Config::OLD_USER_PREFIX );
+			$len = strlen( $prefix );
 
-			return "$prefix$username";
+			if ( substr( $username, 0, $len ) !== $prefix ) {
+				$ret = "$prefix$username";
+			}
 		}
+		return $ret;
 	}
 
 	public function validateUsername( ?string $username, array $data ) {

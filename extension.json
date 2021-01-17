@@ -26,6 +26,11 @@
 			"public": true,
 			"descriptionmsg": "wikitoldap-old-username-prefix-desc"
 		},
+		"OldUsersAreRenamed": {
+		    "value": false,
+			"public": true,
+			"descriptionmsg": "wikitoldap-old-users-are-renamed-desc"
+		},
 		"MigrationInProgress": {
 			"value": true,
 			"public": true,

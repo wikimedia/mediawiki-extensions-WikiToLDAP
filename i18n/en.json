@@ -9,7 +9,8 @@
 
 	"wikitoldap-migrationgroup-desc": "The group old wiki users are put into before any migration is attempted.",
 	"wikitoldap-inprogressgroup-desc": "The group users are put into after they log in and migration has started.",
-	"wikitoldap-old-username-prefix-desc": "The prefix the old wiki accounts have.  You can use the maintenance script 'renameWikiUsers.php' to rename all current wiki users with this prefix.",
+	"wikitoldap-old-username-prefix-desc": "The prefix the old wiki accounts have.  You can use the =-r= option in the 'MoveToMigrationGroup.php' script to rename all current wiki users with this prefix.",
+    "wikitoldap-old-users-are-renamed-desc": "Set to true if you have renamed the old users and expect your users to log in with their LDAP userame.",
 	"wikitoldap-merged-desc": "The group for users who have gone through WikiToLDAP's merge process.",
 	"wikitoldap-migrationinprogress-desc": "Whether any migration is currently in progress.  If false, defaults to behaving just like [https://www.mediawiki.org/wiki/Extension:LDAPAuthentication2 LDAPAuthentication2].",
 
@@ -37,7 +38,9 @@
 	"wikitoldap-merge-not-needed": "==== You have successfully authenticated to a matching LDAP account.====\nYou will need to use your LDAP credentials to log in from now on.",
 	"wikitoldap-merge-done": "==== This account has been merged and deleted. ====\nYou are no longer logged in.  Please log in using your LDAP account.",
 	"wikitoldap-wiki-merge-done": "==== The wiki account has been merged and deleted. ====",
-	"wikitoldap-continue": "continue",
+    "wikitoldap-continue": "continue",
+    "wikitoldap-select-wiki-account": "Type your old wiki username.  Auto-completion is available.",
+    "wikitoldap-select-renamed-wiki-account": "Type your old wiki username.  You can use auto-completion if you prefix your old username with '$1' since all the old users have been renamed.",
 	"wikitoldap-select-wiki-account": "A wiki account:",
 	"wikitoldap-wiki-password": "Wiki account password:",
 

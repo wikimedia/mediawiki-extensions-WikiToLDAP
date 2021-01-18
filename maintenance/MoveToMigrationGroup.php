@@ -118,7 +118,6 @@ class MoveToMigrationGroup extends Maintenance {
 	protected function renameThisUser( User $user, string $newname ) {
 		$oldname = $user->getName();
 
-		'@phan-var User $performer';
 		$renameJob = new RenameuserSQL(
 			$user->getName(),
 			$newname,

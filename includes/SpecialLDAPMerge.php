@@ -241,6 +241,8 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		$config = Config::newInstance();
 		$prefix = $config->get( Config::OLD_USER_PREFIX );
 		$renamed = $config->get( Config::OLD_USERS_ARE_RENAMED );
+		$ret = [];
+
 		$ret['message'] = [
 			"type" => "info",
 			"rawrow" => true,
@@ -269,7 +271,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 			'type' => 'password',
 			'required' => true
 		];
-        return $ret;
+		return $ret;
 	}
 
 	public function prefixUsername( ?string $username, array $data ): ?string {

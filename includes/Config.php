@@ -27,8 +27,9 @@ class Config extends GlobalVarConfig {
 	public const IN_PROGRESS_GROUP = "InProgressGroup";
 	public const MERGED_GROUP = "MergedGroup";
 	public const OLD_USER_PREFIX = "OldUsernamePrefix";
-	public const OLD_USERS_ARE_RENAMED = "OldUsersAreRenamed";
 	public const MIGRATION_IN_PROGRESS = "MigrationInProgress";
+	public const OLD_USERS_ARE_RENAMED = "OldUsersAreRenamed";
+	public const CAN_CHECK_OLD_USER = "CanCheckOldUser";
 
 	public function __construct() {
 		parent::__construct( 'WikiToLDAP' );

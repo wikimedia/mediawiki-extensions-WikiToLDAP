@@ -31,6 +31,11 @@
 			"public": true,
 			"descriptionmsg": "wikitoldap-old-users-are-renamed-desc"
 		},
+		"CanCheckOldUser": {
+			"value": false,
+			"public": true,
+			"descriptionmsg": "wikitoldap-can-check-old-user-desc"
+		},
 		"MigrationInProgress": {
 			"value": true,
 			"public": true,
@@ -40,7 +45,7 @@
 	"requires": {
 		"MediaWiki": ">= 1.34.0",
 		"extensions": {
-			"LDAPAuthentication2": ">= 1.0.2"
+			"LDAPAuthentication2": ">= 1.0.1"
 		}
 	},
 	"Hooks": {

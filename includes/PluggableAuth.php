@@ -21,28 +21,90 @@
 namespace MediaWiki\Extension\WikiToLDAP;
 
 use MediaWiki\Extension\LDAPAuthentication2\PluggableAuth as PluggableAuthBase;
+use MediaWiki\Extension\LDAPAuthentication2\ExtraLoginFields;
+use PluggableAuthLogin;
 use User;
 
 class PluggableAuth extends PluggableAuthBase {
 	protected $migrationGroup;
 	protected $inProgressGroup;
+	protected $usersRenamed;
+	protected $oldUserPrefix;
+	protected $canCheckOldUser;
 
 	public function __construct() {
 		$config = Config::newInstance();
 		$this->migrationGroup = $config->get( Config::MIGRATION_GROUP );
 		$this->inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
+		$this->usersRenamed = $config->get( Config::OLD_USERS_ARE_RENAMED );
+		$this->oldUserPrefix = $config->get( Config::OLD_USER_PREFIX );
+		$this->canCheckOldUser = $config->get( Config::CAN_CHECK_OLD_USER );
 	}
 
 	/**
-	 * Adjust the groups for a user based on how it logged in.
+	 * Authenticates against LDAP
+	 * @param int &$id not used
+	 * @param string &$username set to username
+	 * @param string &$realname set to real name
+	 * @param string &$email set to email
+	 * @param string &$errorMessage any errors
+	 * @return bool false on failure
+	 * @SuppressWarnings( UnusedFormalParameter )
+	 * @SuppressWarnings( ShortVariable )
 	 */
-	protected function fixupGroups( User $user ) {
-		$status = UserStatus::singleton();
-		$status->setInProgress( $user );
+	public function authenticate( &$id, &$username, &$realname, &$email, &$errorMessage ) {
+		$authManager = $this->getAuthManager();
+		$extraLoginFields = $authManager->getAuthenticationSessionData(
+			PluggableAuthLogin::EXTRALOGINFIELDS_SESSION_KEY
+		);
+
+		$domain = $extraLoginFields[ExtraLoginFields::DOMAIN];
+		$username = $extraLoginFields[ExtraLoginFields::USERNAME];
+		$password = $extraLoginFields[ExtraLoginFields::PASSWORD];
+
+		wfDebugLog( "wikitoldap", "Trying $username" );
+		// We want them to be able to use the LDAP account if that works, so we have this
+		// work-around
+		$oldUsername = $username;
+		$oldErrorMessage = $errorMessage;
+		if ( $this->usersRenamed ) {
+			$username = $this->oldUserPrefix . ucFirst( $username );
+		}
+
+		wfDebugLog( "wikitoldap", "checking $username for local login" );
+		$isLocal = $this->maybeLocalLogin( $domain, $username, $password, $id, $errorMessage );
+		if ( $isLocal === true ) {
+			wfDebugLog( "wikitoldap", "checking $username for local login was successful" );
+			return true;
+		}
+		$errorMessage = $oldErrorMessage;
+		$username = $oldUsername;
+
+		wfDebugLog( "wikitoldap", "checking $username for ldap login" );
+		if ( !$this->checkLDAPLogin(
+			$domain, $username, $password, $realname, $email, $errorMessage
+		) ) {
+			wfDebugLog( "wikitoldap", "ldap login for $userame failed" );
+			$errorMessage = "LDAP Authentication failed";
+			return false;
+		}
+		$username = $this->normalizeUsername( $username );
+		$user = User::newFromName( $username );
+		if ( $user === false ) {
+			wfDebug( "wikitoldap", "The username '$username' is not valid." );
+			return false;
+		}
+
+		if ( $user->getId() > 0 ) {
+			$id = $user->getId();
+		}
+		wfDebugLog( "wikitoldap", "ldap login for $username got id '$id'" );
+
+		return true;
 	}
 
 	/**
-	 * Determine if this is a wiki account that they are logging into.  If it
+	 * Determine if this is a wiki account that they are logging into.	If it
 	 * is, ensure that it is removed from the MigrationGroup and is in the
 	 * InProgressGroup.
 	 *
@@ -60,7 +122,7 @@ class PluggableAuth extends PluggableAuthBase {
 	 */
 	protected function maybeLocalLogin(
 		$domain,
-		$username,
+		&$username,
 		$password,
 		&$id,
 		&$errorMessage
@@ -72,9 +134,13 @@ class PluggableAuth extends PluggableAuthBase {
 		}
 
 		$status = UserStatus::singleton();
-		wfDebugLog(
-			"wikitoldap", "$username merged? " . ( $status->isMerged( $user ) ? "yes" : "no" )
-		);
+
+		// If they aren't a wiki user, pass
+		if ( !$status->isWiki( $user ) ) {
+			wfDebugLog( "wikitoldap", "$username is not a wiki user." );
+			return null;
+		}
+
 		// If they are designated merged, they are't a wiki user
 		if ( $status->isMerged( $user ) ) {
 			# HACK!! The user merge copies over the wiki group after we can make adjustments, so we fix it here.
@@ -83,15 +149,9 @@ class PluggableAuth extends PluggableAuthBase {
 			return null;
 		}
 
-		// If they were never in the migration_group, they aren't a wiki user
-		if ( !$status->isWiki( $user ) ) {
-			wfDebugLog( "wikitoldap", "$username is not a wiki user." );
-			return null;
-		}
-
 		// Validate local user the mediawiki way
 		if ( $this->checkLocalPassword( $username, $password ) ) {
-			$this->fixupGroups( $user );
+			$status->setInProgress( $user );
 
 			wfDebugLog( "wikitoldap", "Successful local login for $username" );
 			return true;

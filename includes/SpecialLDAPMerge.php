@@ -275,10 +275,11 @@ class SpecialLDAPMerge extends FormSpecialPage {
 	}
 
 	public function prefixUsername( ?string $username, array $data ): ?string {
+		$username = ucFirst( $username );
 		$ret = $username;
 		if ( $username ) {
 			$config = Config::newInstance();
-			$prefix = $config->get( Config::OLD_USER_PREFIX );
+			$prefix = ucFirst( $config->get( Config::OLD_USER_PREFIX ) );
 			$len = strlen( $prefix );
 
 			if ( substr( $username, 0, $len ) !== $prefix ) {

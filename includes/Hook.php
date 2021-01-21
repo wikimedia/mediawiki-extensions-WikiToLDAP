@@ -23,6 +23,7 @@ namespace MediaWiki\Extension\WikiToLDAP;
 
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
+use RequestContext;
 use Title;
 use User;
 
@@ -42,11 +43,6 @@ class Hook {
 		$GLOBALS["wgPluggableAuth_Class"] = __NAMESPACE__ . "\\PluggableAuth";
 		$GLOBALS["wgWhitelistRead"][] = "Special:" . SpecialWikiMerge::PAGENAME;
 		$GLOBALS["wgWhitelistRead"][] = "Special:" . SpecialLDAPMerge::PAGENAME;
-	}
-
-	private static function getGroup( string $groupKey ): string {
-		$config = Config::newInstance();
-		return $config->get( $groupKey );
 	}
 
 	private static function getWizardPage( User $user ): ?Title {
@@ -104,7 +100,7 @@ class Hook {
 	/**
 	 * Set up groups on a new login.
 	 *
-	 * This has to be here and not at the time of LDAP authentication.  Before
+	 * This has to be here and not at the time of LDAP authentication. Before
 	 * this point, we can't tell if we have a new user or not, let alone what
 	 * groups the user has been a member of.
 	 *
@@ -127,6 +123,30 @@ class Hook {
 				$msg = "Trouble setting $username to 'in progress'.";
 			}
 			wfDebugLog( "wikitoldap", $msg );
+		}
+	}
+
+	/**
+	 * Make sure people aren't confused by the old username prefix.
+	 *
+	 * @see https://www.mediawiki.org/wiki/Manual:Hooks/AuthChangeFormFields
+	 */
+	public static function onAuthChangeFormFields(
+		array $requests,
+		array $fieldInfo,
+		array &$form,
+		string $action
+	) {
+		$req = RequestContext::getMain()->getRequest();
+		$conf = Config::newInstance();
+		$prefix = $conf->get( Config::OLD_USER_PREFIX );
+		$prefixLen = strlen( $prefix );
+
+		$username = $req->getCookie( "UserName" ) ?? "";
+		if ( substr( $username, 0, $prefixLen ) === $prefix ) {
+			if ( isset( $form['username']['type'] ) ) {
+				$form['username']['default']  = substr( $username, $prefixLen );
+			}
 		}
 	}
 }

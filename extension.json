@@ -50,7 +50,8 @@
 	},
 	"Hooks": {
 		"userCan": "MediaWiki\\Extension\\WikiToLDAP\\Hook::onUserCan",
-		"PluggableAuthPopulateGroups": "MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthPopulateGroups"
+		"PluggableAuthPopulateGroups": "MediaWiki\\Extension\\WikiToLDAP\\Hook::onPluggableAuthPopulateGroups",
+		"AuthChangeFormFields": "MediaWiki\\Extension\\WikiToLDAP\\Hook::onAuthChangeFormFields"
 	},
 	"callback": "MediaWiki\\Extension\\WikiToLDAP\\Hook::init",
 	"SpecialPages": {

@@ -294,10 +294,10 @@ class SpecialWikiMerge extends FormSpecialPage {
 
 	protected function clearSession(): void {
 		$prefix = $this->getMessagePrefix();
-		$prefixLen = strlen( $prefix );
+		$prefixLen = mb_strlen( $prefix );
 
 		foreach ( $this->session as $key => $value ) {
-			if ( substr( $key, 0, $prefixLen ) === $prefix && $prefixLen < strlen( $key ) ) {
+			if ( mb_substr( $key, 0, $prefixLen ) === $prefix && $prefixLen < mb_strlen( $key ) ) {
 				$this->session->remove( $key );
 			}
 		}

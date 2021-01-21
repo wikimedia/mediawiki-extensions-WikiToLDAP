@@ -21,7 +21,8 @@
 		}
 	],
 	"require": {
-		"mediawiki/ldap-authentication-2": "~1.0"
+		"mediawiki/ldap-authentication-2": "~1.0",
+		"ext-mbstring": "*"
 	},
 	"require-dev": {
 		"mediawiki/mediawiki-codesniffer": "^31.0",

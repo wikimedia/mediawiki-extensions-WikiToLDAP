@@ -66,7 +66,7 @@ class MoveToMigrationGroup extends Maintenance {
 	public function init() {
 		$this->config = Config::newInstance();
 		$this->prefix = $this->config->get( Config::OLD_USER_PREFIX );
-		$this->prefixLen = strlen( $this->prefix );
+		$this->prefixLen = mb_strlen( $this->prefix );
 		$this->performer = User::newSystemUser( 'Maintenance script', [ 'steal' => true ] );
 	}
 
@@ -97,7 +97,7 @@ class MoveToMigrationGroup extends Maintenance {
 
 			$oldname = $user->getName();
 			if ( $this->hasOption( 'rename' ) ) {
-				if ( substr( $oldname, 0, $this->prefixLen ) !== $this->prefix ) {
+				if ( mb_substr( $oldname, 0, $this->prefixLen ) !== $this->prefix ) {
 					$renamed = $this->prefix . $oldname;
 					$this->output( "Renaming user '$oldname' to '$renamed'... {$esc}[K" );
 					if ( $this->renameThisUser( $user,  $renamed ) ) {

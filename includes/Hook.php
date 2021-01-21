@@ -140,12 +140,12 @@ class Hook {
 		$req = RequestContext::getMain()->getRequest();
 		$conf = Config::newInstance();
 		$prefix = $conf->get( Config::OLD_USER_PREFIX );
-		$prefixLen = strlen( $prefix );
+		$prefixLen = mb_strlen( $prefix );
 
 		$username = $req->getCookie( "UserName" ) ?? "";
-		if ( substr( $username, 0, $prefixLen ) === $prefix ) {
+		if ( mb_substr( $username, 0, $prefixLen ) === $prefix ) {
 			if ( isset( $form['username']['type'] ) ) {
-				$form['username']['default']  = substr( $username, $prefixLen );
+				$form['username']['default']  = mb_substr( $username, $prefixLen );
 			}
 		}
 	}

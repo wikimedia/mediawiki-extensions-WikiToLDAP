@@ -81,7 +81,7 @@ class PluggableAuth extends PluggableAuthBase {
 		$username = $oldUsername;
 
 		if (
-			strtolower( substr( $username, 0, strlen( $this->oldUserPrefix ) ) )
+			strtolower( mb_substr( $username, 0, mb_strlen( $this->oldUserPrefix ) ) )
 			=== strtolower( $this->oldUserPrefix )
 		) {
 			$errorMessage = wfMessage( "wikitoldap-no-ldap-login-prefix" )->plain();

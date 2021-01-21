@@ -280,9 +280,9 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		if ( $username ) {
 			$config = Config::newInstance();
 			$prefix = ucFirst( $config->get( Config::OLD_USER_PREFIX ) );
-			$len = strlen( $prefix );
+			$len = mb_strlen( $prefix );
 
-			if ( substr( $username, 0, $len ) !== $prefix ) {
+			if ( mb_substr( $username, 0, $len ) !== $prefix ) {
 				$ret = "$prefix$username";
 			}
 		}
@@ -348,10 +348,10 @@ class SpecialLDAPMerge extends FormSpecialPage {
 
 	protected function clearSession(): void {
 		$prefix = $this->getMessagePrefix();
-		$prefixLen = strlen( $prefix );
+		$prefixLen = mb_strlen( $prefix );
 
 		foreach ( $this->session as $key => $value ) {
-			if ( substr( $key, 0, $prefixLen ) === $prefix && $prefixLen < strlen( $key ) ) {
+			if ( mb_substr( $key, 0, $prefixLen ) === $prefix && $prefixLen < mb_strlen( $key ) ) {
 				$this->session->remove( $key );
 			}
 		}

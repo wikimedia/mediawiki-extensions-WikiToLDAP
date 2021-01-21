@@ -22,7 +22,7 @@
 			"descriptionmsg": "wikitoldap-merged-desc"
 		},
 		"OldUsernamePrefix": {
-			"value": "Wiki-",
+			"value": "Wiki⛘",
 			"public": true,
 			"descriptionmsg": "wikitoldap-old-username-prefix-desc"
 		},

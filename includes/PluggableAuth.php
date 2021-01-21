@@ -80,12 +80,20 @@ class PluggableAuth extends PluggableAuthBase {
 		$errorMessage = $oldErrorMessage;
 		$username = $oldUsername;
 
+		if (
+			strtolower( substr( $username, 0, strlen( $this->oldUserPrefix ) ) )
+			=== strtolower( $this->oldUserPrefix )
+		) {
+			$errorMessage = wfMessage( "wikitoldap-no-ldap-login-prefix" )->plain();
+			return false;
+		}
+
 		wfDebugLog( "wikitoldap", "checking $username for ldap login" );
 		if ( !$this->checkLDAPLogin(
 			$domain, $username, $password, $realname, $email, $errorMessage
 		) ) {
 			wfDebugLog( "wikitoldap", "ldap login for $userame failed" );
-			$errorMessage = "LDAP Authentication failed";
+			$errorMessage = wfMessage( "wikitoldap-ldap-login-failed" )->plain();
 			return false;
 		}
 		$username = $this->normalizeUsername( $username );
@@ -143,7 +151,8 @@ class PluggableAuth extends PluggableAuthBase {
 
 		// If they are designated merged, they are't a wiki user
 		if ( $status->isMerged( $user ) ) {
-			# HACK!! The user merge copies over the wiki group after we can make adjustments, so we fix it here.
+			# HACK!! The user merge copies over the wiki group after we can make adjustments, so we
+			# fix it here.
 			$status->setNotWiki( $user );
 			wfDebugLog( "wikitoldap", "$username has been merged not a wiki user." );
 			return null;

@@ -51,6 +51,9 @@
 	"wikitoldap-only-one-domain": "WikiToLDAP currently only works with one LDAP domain.",
 	"wikitoldap-invalid-password": "Invalid password, please try again",
 
+	"wikitoldap-no-ldap-login-prefix": "Cannot log into LDAP with a prefixed username",
+	"wikitoldap-ldap-login-failed": "LDAP login failed",
+
 	"wikitoldap-ldap-cancel": "Skip this and go back to the wiki",
 	"wikitoldap-ldap-continue": "Merge old wiki account",
 	"wikitoldap-return": "Return to wiki",

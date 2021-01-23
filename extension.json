@@ -27,7 +27,7 @@
 			"descriptionmsg": "wikitoldap-old-username-prefix-desc"
 		},
 		"OldUsersAreRenamed": {
-		    "value": false,
+			"value": false,
 			"public": true,
 			"descriptionmsg": "wikitoldap-old-users-are-renamed-desc"
 		},
@@ -83,10 +83,12 @@
 	"descriptionmsg": "wikitoldap-desc",
 	"license-name": "GPL-3.0-or-later",
 	"type": "other",
-    "LogTypes": [ "wikitoldap" ],
-    "LogActionsHandlers": {
-        "wikitoldap/*": "LogFormatter"
-    },
+	"LogTypes": [
+		"wikitoldap"
+	],
+	"LogActionsHandlers": {
+		"wikitoldap/*": "LogFormatter"
+	},
 	"GroupPermissions": {
 		"wikitoldap-needs-migration": {
 			"migrate-from-ldap": true
@@ -111,7 +113,6 @@
 			"datatransferimport": true,
 			"delete": true,
 			"deletechangetags": true,
-			"deletechangetags": true,
 			"deletelogentry": true,
 			"deleterevision": true,
 			"edit": true,
@@ -148,7 +149,6 @@
 			"userrights": true,
 			"viewedittab": true,
 			"viewmyprivateinfo": true,
-			"viewmywatchlist": true,
 			"viewmywatchlist": true,
 			"viewsuppressed": true,
 			"writeapi": true
@@ -165,7 +165,6 @@
 			"datatransferimport": true,
 			"delete": true,
 			"deletechangetags": true,
-			"deletechangetags": true,
 			"deletelogentry": true,
 			"deleterevision": true,
 			"edit": true,
@@ -202,7 +201,6 @@
 			"userrights": true,
 			"viewedittab": true,
 			"viewmyprivateinfo": true,
-			"viewmywatchlist": true,
 			"viewmywatchlist": true,
 			"viewsuppressed": true,
 			"writeapi": true

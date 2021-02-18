@@ -145,7 +145,7 @@ class Hook {
 		$username = $req->getCookie( "UserName" ) ?? "";
 		if ( mb_substr( $username, 0, $prefixLen ) === $prefix ) {
 			if ( isset( $form['username']['type'] ) ) {
-				$form['username']['default']  = mb_substr( $username, $prefixLen );
+				$form['username']['default'] = mb_substr( $username, $prefixLen );
 			}
 		}
 	}

@@ -20,8 +20,8 @@
 
 namespace MediaWiki\Extension\WikiToLDAP;
 
-use MediaWiki\Extension\LDAPAuthentication2\PluggableAuth as PluggableAuthBase;
 use MediaWiki\Extension\LDAPAuthentication2\ExtraLoginFields;
+use MediaWiki\Extension\LDAPAuthentication2\PluggableAuth as PluggableAuthBase;
 use PluggableAuthLogin;
 use User;
 
@@ -49,8 +49,6 @@ class PluggableAuth extends PluggableAuthBase {
 	 * @param string &$email set to email
 	 * @param string &$errorMessage any errors
 	 * @return bool false on failure
-	 * @SuppressWarnings( UnusedFormalParameter )
-	 * @SuppressWarnings( ShortVariable )
 	 */
 	public function authenticate( &$id, &$username, &$realname, &$email, &$errorMessage ) {
 		$authManager = $this->getAuthManager();
@@ -92,7 +90,7 @@ class PluggableAuth extends PluggableAuthBase {
 		if ( !$this->checkLDAPLogin(
 			$domain, $username, $password, $realname, $email, $errorMessage
 		) ) {
-			wfDebugLog( "wikitoldap", "ldap login for $userame failed" );
+			wfDebugLog( "wikitoldap", "ldap login for $username failed" );
 			$errorMessage = wfMessage( "wikitoldap-ldap-login-failed" )->plain();
 			return false;
 		}
@@ -121,7 +119,7 @@ class PluggableAuth extends PluggableAuthBase {
 	 * Return null if this is not a wiki account.
 	 *
 	 * @param string $domain we are logging into
-	 * @param string $username for the user
+	 * @param string &$username for the user
 	 * @param string $password for the user
 	 * @param int &$id value of id
 	 * @param string &$errorMessage any error message for the user

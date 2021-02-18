@@ -29,6 +29,7 @@ use HTMLForm;
 use MediaWiki\MediaWikiServices;
 use MergeUser;
 use Message;
+use MovePage;
 use Status;
 use Title;
 use User;
@@ -39,6 +40,9 @@ use Wikimedia\Timestamp\ConvertibleTimestamp;
  * Special page that handles account merging.
  */
 class SpecialLDAPMerge extends FormSpecialPage {
+
+	/** The original username */
+	protected $originalUsername = null;
 
 	/** The text of the submit button. */
 	protected $submitButton = null;
@@ -246,13 +250,17 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		$ret['message'] = [
 			"type" => "info",
 			"rawrow" => true,
-			"default" => new Message( $this->getMessagePrefix() . "-select-wiki-instructions", [ $prefix ] )
+			"default" => new Message(
+				$this->getMessagePrefix() . "-select-wiki-instructions", [ $prefix ]
+			)
 		];
 		if ( $renamed ) {
 			$ret['message'] = [
 				"type" => "info",
 				"rawrow" => true,
-				"default" => new Message( $this->getMessagePrefix() . "-select-renamed-wiki-instructions", [ $prefix ] )
+				"default" => new Message(
+					$this->getMessagePrefix() . "-select-renamed-wiki-instructions", [ $prefix ]
+				)
 			];
 		}
 		$ret['username'] = [
@@ -275,14 +283,15 @@ class SpecialLDAPMerge extends FormSpecialPage {
 	}
 
 	public function prefixUsername( ?string $username, array $data ): ?string {
-		$username = ucFirst( $username );
 		$ret = $username;
 		if ( $username ) {
 			$config = Config::newInstance();
+			$username = ucFirst( $username );
 			$prefix = ucFirst( $config->get( Config::OLD_USER_PREFIX ) );
 			$len = mb_strlen( $prefix );
 
 			if ( mb_substr( $username, 0, $len ) !== $prefix ) {
+				$this->setSession( "originalUsername", $username );
 				$ret = "$prefix$username";
 			}
 		}
@@ -387,12 +396,17 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		];
 	}
 
+	/**
+	 * Since this page is displayed after the merge is actually done, we have to use it to perform
+	 * the merge.
+	 */
 	public function merged(): array {
 		$this->submitButton = $this->getMessagePrefix() . "-continue";
 
 		$username = $this->getSession( "username" );
 		$authenticated = $this->getSession( "authenticated" );
 		$confirmed = $this->getSession( "confirmed" );
+		$original = $this->getSession( "originalUsername" );
 		if ( !$username || !$authenticated || !$confirmed ) {
 			throw new IncompleteFormException();
 		}
@@ -402,15 +416,32 @@ class SpecialLDAPMerge extends FormSpecialPage {
 			throw new IncompleteFormException();
 		}
 
+		if ( $original ) {
+			$this->originalUsername = $original;
+		}
+		$this->doMerge( $wikiUser, $this->getUser() );
+
+		return [
+			"message" => [
+				"type" => "info",
+				"rawrow" => true,
+				"default" => new Message(
+					$this->getMessagePrefix() . "-wiki-merge-done"
+				)
+			]
+		];
+	}
+
+	protected function doMerge( User $wikiUser, User $targetUser ) {
 		// We're saying the LDAP user is the "performer" since we're merging the two accounts
-		$um = new MergeUser( $wikiUser, $this->getUser(), new UserMergeLogger() );
-		$um->merge( $this->getUser(), __METHOD__ );
+		$um = new MergeUser( $wikiUser, $targetUser, new UserMergeLogger() );
+		$um->merge( $targetUser, __METHOD__ );
 
 		$out = $this->getOutput();
 		$out->addWikiMsg(
 			'usermerge-success',
 			$wikiUser->getName(), $wikiUser->getId(),
-			$this->getUser()->getName(), $this->getUser()->getId()
+			$targetUser->getName(), $targetUser->getId()
 		);
 
 		$failed = $um->delete( $wikiUser, [ $this, 'msg' ] );
@@ -435,22 +466,98 @@ class SpecialLDAPMerge extends FormSpecialPage {
 			}
 
 			$out->addHTML( Html::closeElement( 'ul' ) );
+		}
+
+		// Not null if the original was prefixed
+		if ( $this->originalUsername ) {
+			$ret = $this->moveUserPages(
+				User::newFromName( $this->originalUsername )->getUserPage(),
+				$this->getUser()->getUserPage()
+			);
+			if ( $ret !== '' ) {
+				$out->addHTML( HTML::rawElement( 'ul', [], $ret ) );
+			}
 
 		}
 
 		$status = UserStatus::singleton();
-		$status->setNotInProgress( $this->getUser() );
-		$status->setMerged( $this->getUser() );
+		$status->setNotInProgress( $targetUser );
+		$status->setMerged( $targetUser );
+	}
 
-		return [
-			"message" => [
-				"type" => "info",
-				"rawrow" => true,
-				"default" => new Message(
-					$this->getMessagePrefix() . "-wiki-merge-done"
-				)
-			]
-		];
+	/**
+	 * This bit copied from a portion of SpecialRenameuser::execute()
+	 */
+	protected function moveUserPages( Title $oldusername, Title $newusername ): string {
+		// Move any user pages
+		$dbr = wfGetDB( DB_REPLICA );
+
+		$pages = $dbr->select(
+			'page',
+			[ 'page_namespace', 'page_title' ],
+			[
+				'page_namespace' => [ NS_USER, NS_USER_TALK ],
+				$dbr->makeList( [
+					'page_title ' . $dbr->buildLike( $oldusername->getDBkey() . '/', $dbr->anyString() ),
+					'page_title = ' . $dbr->addQuotes( $oldusername->getDBkey() ),
+				], LIST_OR ),
+			],
+			__METHOD__
+		);
+
+		$suppressRedirect = false;
+
+		$output = '';
+		$linkRenderer = $this->getLinkRenderer();
+		foreach ( $pages as $row ) {
+			$oldPage = Title::makeTitleSafe( $row->page_namespace, $row->page_title );
+			$newPage = Title::makeTitleSafe(
+				$row->page_namespace,
+				preg_replace( '!^[^/]+!', $newusername->getDBkey(), $row->page_title )
+			);
+
+			$movePage = new MovePage( $oldPage, $newPage );
+			$validMoveStatus = $movePage->isValidMove();
+
+			# Do not autodelete or anything, title must not exist
+			if ( $newPage->exists() && !$validMoveStatus->isOK() ) {
+				$link = $linkRenderer->makeKnownLink( $newPage );
+				$output .= Html::rawElement(
+					'li',
+					[ 'class' => 'mw-renameuser-pe' ],
+					$this->msg( 'renameuser-page-exists' )->rawParams( $link )->escaped()
+				);
+			} else {
+				$logReason = $this->msg(
+					'renameuser-move-log', $oldusername->getText(), $newusername->getText()
+				)->inContentLanguage()->text();
+
+				$moveStatus = $movePage->move( $this->getUser(), $logReason, !$suppressRedirect );
+
+				if ( $moveStatus->isOK() ) {
+					# oldPage is not known in case of redirect suppression
+					$oldLink = $linkRenderer->makeLink( $oldPage, null, [], [ 'redirect' => 'no' ] );
+
+					# newPage is always known because the move was successful
+					$newLink = $linkRenderer->makeKnownLink( $newPage );
+
+					$output .= Html::rawElement(
+						'li',
+						[ 'class' => 'mw-renameuser-pm' ],
+						$this->msg( 'renameuser-page-moved' )->rawParams( $oldLink, $newLink )->escaped()
+					);
+				} else {
+					$oldLink = $linkRenderer->makeKnownLink( $oldPage );
+					$newLink = $linkRenderer->makeLink( $newPage );
+					$output .= Html::rawElement(
+						'li', [ 'class' => 'mw-renameuser-pu' ],
+						$this->msg( 'renameuser-page-unmoved' )->rawParams( $oldLink, $newLink )
+							 ->escaped()
+					);
+				}
+			}
+		}
+		return $output;
 	}
 
 	/**

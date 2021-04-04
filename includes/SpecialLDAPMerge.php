@@ -330,7 +330,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 	 * @see LDAPAuthentication2\PluggableAuth::checkLocalPassword()
 	 */
 	protected function checkLocalPassword( string $username, string $password ) {
-		$user = User::newFromName( $username );
+		$user = User::newFromName( ucFirst( $username ) );
 		$services = MediaWikiServices::getInstance();
 		$passwordFactory = $services->getPasswordFactory();
 
@@ -411,7 +411,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 			throw new IncompleteFormException();
 		}
 
-		$wikiUser = User::newFromName( $username );
+		$wikiUser = User::newFromName( ucFirst( $username ) );
 		if ( !$wikiUser || $wikiUser->getId() === 0 ) {
 			throw new IncompleteFormException();
 		}
@@ -471,7 +471,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		// Not null if the original was prefixed
 		if ( $this->originalUsername ) {
 			$ret = $this->moveUserPages(
-				User::newFromName( $this->originalUsername )->getUserPage(),
+				User::newFromName( ucFirst( $this->originalUsername ) )->getUserPage(),
 				$this->getUser()->getUserPage()
 			);
 			if ( $ret !== '' ) {

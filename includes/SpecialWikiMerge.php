@@ -317,7 +317,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 			throw new IncompleteFormException();
 		}
 
-		$ldapUser = User::newFromName( $username );
+		$ldapUser = User::newFromName( ucFirst( $username ) );
 		# The ldap user is the same username as the wiki user, so report complete
 		if ( $ldapUser && $ldapUser->getId() === $this->getUser()->getId() ) {
 			$status = UserStatus::singleton();
@@ -374,9 +374,9 @@ class SpecialWikiMerge extends FormSpecialPage {
 			wfDebugLog( "wikitoldap", "Incomplete: $username/$authenticated/$confirmed" );
 			throw new IncompleteFormException();
 		}
-		$ldapUser = User::newFromName( $username );
+		$ldapUser = User::newFromName( ucFirst ( $username ) );
 		if ( $ldapUser->getId() === 0 ) {
-			$ldapUser = User::createNew( $username );
+			$ldapUser = User::createNew( ucFirst( $username ) );
 		}
 		if ( $ldapUser === null ) {
 			throw new MWException( "Couldn't create a user for $username!" );

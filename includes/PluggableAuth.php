@@ -95,7 +95,7 @@ class PluggableAuth extends PluggableAuthBase {
 			return false;
 		}
 		$username = $this->normalizeUsername( $username );
-		$user = User::newFromName( $username );
+		$user = User::newFromName( ucFirst( $username ) );
 		if ( $user === false ) {
 			wfDebug( "wikitoldap", "The username '$username' is not valid." );
 			return false;
@@ -133,7 +133,7 @@ class PluggableAuth extends PluggableAuthBase {
 		&$id,
 		&$errorMessage
 	) {
-		$user = User::newFromName( $username );
+		$user = User::newFromName( ucFirst( $username ) );
 		if ( $user === false || $user->getId() === 0 ) {
 			wfDebugLog( "wikitoldap", "No DB entry for $username. Not a local user." );
 			return null;

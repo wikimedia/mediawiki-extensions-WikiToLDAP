@@ -33,7 +33,6 @@ use MovePage;
 use Status;
 use Title;
 use User;
-use UserMergeLogger;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 /**
@@ -434,7 +433,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 
 	protected function doMerge( User $wikiUser, User $targetUser ) {
 		// We're saying the LDAP user is the "performer" since we're merging the two accounts
-		$um = new MergeUser( $wikiUser, $targetUser, new UserMergeLogger() );
+		$um = new MergeUser( $wikiUser, $targetUser, new Logger() );
 		$um->merge( $targetUser, __METHOD__ );
 
 		$out = $this->getOutput();

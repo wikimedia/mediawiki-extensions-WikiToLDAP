@@ -62,6 +62,8 @@
 	"log-name-wikitoldap": "Wiki to LDAP account conversion",
 	"log-description-wikitoldap": "These are the logs from any account merging activity.",
 	"logentry-wikitoldap-redirect": "$1 {{GENDER:$2|was redirected}} to migrate {{GENDER:$2|his|her|their}} account when accessing $3",
+	"logentry-wikitoldap-mergeuser": "$1 {{GENDER:$2|merged}} the user account \"$3\" ($4) into {{GENDER:$7|$1}} ($2)",
+	"logentry-wikitoldap-deleteuser": "$1 {{GENDER:$2|deleted}} the user account \"$4\" ($5)",
 
 	"wikiusermerge": "Wiki user migration",
 	"ldapusermerge": "Merge old wiki accounts with LDAP accounts",

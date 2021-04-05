@@ -34,7 +34,6 @@ use MWException;
 use Status;
 use Title;
 use User;
-use UserMergeLogger;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
 /**
@@ -398,7 +397,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 
 	public function mergeUser( User $ldapUser ) {
 		// We're saying the LDAP user is the "performer" since we're merging the two accounts
-		$um = new MergeUser( $this->getUser(), $ldapUser, new UserMergeLogger() );
+		$um = new MergeUser( $this->getUser(), $ldapUser, new Logger() );
 		$um->merge( $ldapUser, __METHOD__ );
 
 		$out = $this->getOutput();

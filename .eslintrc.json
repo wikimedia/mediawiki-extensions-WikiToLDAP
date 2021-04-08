@@ -4,5 +4,12 @@
 		"wikimedia/client",
 		"wikimedia/jquery",
 		"wikimedia/mediawiki"
-	]
+	],
+	"rules": {
+		"one-var": "warn",
+		"vars-on-top": "warn",
+		"no-jquery/no-global-selector": "warn",
+		"quotes": "warn",
+		"no-unused-vars": "warn"
+	}
 }

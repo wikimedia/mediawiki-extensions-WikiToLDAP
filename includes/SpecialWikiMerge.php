@@ -374,7 +374,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 			wfDebugLog( "wikitoldap", "Incomplete: $username/$authenticated/$confirmed" );
 			throw new IncompleteFormException();
 		}
-		$ldapUser = User::newFromName( ucFirst ( $username ) );
+		$ldapUser = User::newFromName( ucFirst( $username ) );
 		if ( $ldapUser->getId() === 0 ) {
 			$ldapUser = User::createNew( ucFirst( $username ) );
 		}

@@ -29,6 +29,7 @@ use User;
 
 class Hook {
 
+	/** @var bool */
 	private static $isWorking = false;
 
 	/**
@@ -45,6 +46,10 @@ class Hook {
 		$GLOBALS["wgWhitelistRead"][] = "Special:" . SpecialLDAPMerge::PAGENAME;
 	}
 
+	/**
+	 * @param User $user
+	 * @return ?Title
+	 */
 	private static function getWizardPage( User $user ): ?Title {
 		$status = UserStatus::singleton();
 		$page = null;

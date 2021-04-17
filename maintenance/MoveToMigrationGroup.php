@@ -35,10 +35,18 @@ require "$IP/maintenance/Maintenance.php";
 
 $maintClass = MoveToMigrationGroup::class;
 class MoveToMigrationGroup extends Maintenance {
-	private /** @var Config */ $config;
-	private /** @var string */ $prefix;
-	private /** @var int */ $prefixLen;
-	private /** @var User */ $performer;
+
+	/** @var Config */
+	private $config;
+
+	/** @var string */
+	private $prefix;
+
+	/** @var int */
+	private $prefixLen;
+
+	/** @var User */
+	private $performer;
 
 	public function __construct() {
 		parent::__construct();

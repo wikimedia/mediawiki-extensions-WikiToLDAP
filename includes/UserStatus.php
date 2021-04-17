@@ -24,6 +24,8 @@ namespace MediaWiki\Extension\WikiToLDAP;
 use User;
 
 class UserStatus {
+
+	/** @var self */
 	private static $singleton = null;
 	protected $migrationGroup;
 	protected $inProgressGroup;

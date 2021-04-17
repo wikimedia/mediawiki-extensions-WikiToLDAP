@@ -6,12 +6,11 @@
 		"wikimedia/mediawiki"
 	],
 	"rules": {
+		"compat/compat": "warn",
+		"no-jquery/no-global-selector": "warn",
+		"no-unused-vars": "warn",
 		"one-var": "warn",
 		"vars-on-top": "warn",
-		"no-jquery/no-global-selector": "warn",
-		"quotes": "warn",
-		"no-unused-vars": "warn",
-		"compat/compat": "warn",
-		"no-mixed-spaces-and-tabs": "warn"
+		"quotes": "warn"
 	}
 }

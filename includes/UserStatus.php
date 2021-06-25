@@ -21,6 +21,8 @@
  */
 namespace MediaWiki\Extension\WikiToLDAP;
 
+use MediaWiki\MediaWikiServices;
+use MediaWiki\User\UserGroupManager;
 use User;
 
 class UserStatus {
@@ -31,11 +33,15 @@ class UserStatus {
 	protected $inProgressGroup;
 	protected $mergedGroup;
 
+	/** @var UserGroupManager */
+	private $userGroupManager;
+
 	public function __construct() {
 		$config = Config::newInstance();
 		$this->migrationGroup = $config->get( Config::MIGRATION_GROUP );
 		$this->inProgressGroup = $config->get( Config::IN_PROGRESS_GROUP );
 		$this->mergedGroup = $config->get( Config::MERGED_GROUP );
+		$this->userGroupManager = MediaWikiServices::getInstance()->getUserGroupManager();
 	}
 
 	public static function singleton(): self {
@@ -49,14 +55,17 @@ class UserStatus {
 	 * Get all the groups this user has ever been in.
 	 */
 	protected function getAllGroups( User $user ): array {
-		return array_merge( $user->getFormerGroups(), $user->getGroups() );
+		return array_merge(
+			$this->userGroupManager->getUserFormerGroups( $user ),
+			$this->userGroupManager->getUserGroups( $user )
+		);
 	}
 
 	/**
 	 * Check if this user is one that needs to be migrated.
 	 */
 	public function isWiki( User $user ): bool {
-		return in_array( $this->migrationGroup, $user->getGroups() );
+		return in_array( $this->migrationGroup, $this->userGroupManager->getUserGroups( $user ) );
 	}
 
 	/**
@@ -73,7 +82,7 @@ class UserStatus {
 		}
 
 		$msg = "Adding $username to {$this->migrationGroup}.";
-		if ( $user->addGroup( $this->migrationGroup ) === false ) {
+		if ( $this->userGroupManager->addUserToGroup( $user, $this->migrationGroup ) === false ) {
 			$msg = "Trouble adding $username to {$this->migrationGroup}.";
 			$ret = false;
 		}
@@ -96,7 +105,7 @@ class UserStatus {
 		}
 
 		$msg = "Removed $username from migration group.";
-		if ( $user->removeGroup( $this->migrationGroup ) === false ) {
+		if ( $this->userGroupManager->removeUserFromGroup( $user, $this->migrationGroup ) === false ) {
 			$msg = "Trouble removing $username from migration group.";
 			$ret = false;
 		}
@@ -109,7 +118,7 @@ class UserStatus {
 	 * Is this user in progress of being migrated right now?
 	 */
 	public function isInProgress( User $user ): bool {
-		return in_array( $this->inProgressGroup, $user->getGroups() );
+		return in_array( $this->inProgressGroup, $this->userGroupManager->getUserGroups( $user ) );
 	}
 
 	/**
@@ -126,7 +135,7 @@ class UserStatus {
 		}
 
 		$msg = "Adding $username to progress group.";
-		if ( $user->addGroup( $this->inProgressGroup ) === false ) {
+		if ( $this->userGroupManager->addUserToGroup( $user, $this->inProgressGroup ) === false ) {
 			$msg = "Trouble adding $username to progress group.";
 			$ret = false;
 		}
@@ -149,7 +158,7 @@ class UserStatus {
 		}
 
 		$msg = "Removed $username from progress.";
-		if ( $user->removeGroup( $this->inProgressGroup ) === false ) {
+		if ( $this->userGroupManager->removeUserFromGroup( $user, $this->inProgressGroup ) === false ) {
 			$msg = "Trouble removing $username from progress.";
 			$ret = false;
 		}
@@ -162,7 +171,7 @@ class UserStatus {
 	 * Check if this user has had a merge completed (is LDAP backed)
 	 */
 	public function isMerged( User $user ): bool {
-		return in_array( $this->mergedGroup, $user->getGroups() );
+		return in_array( $this->mergedGroup, $this->userGroupManager->getUserGroups( $user ) );
 	}
 
 	/**
@@ -179,7 +188,7 @@ class UserStatus {
 		}
 
 		$msg = "Adding $username to {$this->mergedGroup}.";
-		if ( $user->addGroup( $this->mergedGroup ) === false ) {
+		if ( $this->userGroupManager->addUserToGroup( $user, $this->mergedGroup ) === false ) {
 			$msg = "Trouble adding $username to {$this->mergedGroup}.";
 			$ret = false;
 		}

@@ -32,7 +32,7 @@ Of course, this means that the ldap users cannot be in that group.
   I was trying to use the $title parameter of the userCan hook to avoid a redirect look but that is not working.
   Got to find a better hook.
 
-It ended up working, but I'm bailing (=exit()=) after the the redirect
+It ended up working, but I'm bailing (=exit()=) after the redirect
 
 Also, had to whitelist the MigrateUserToLDAP page.o
 

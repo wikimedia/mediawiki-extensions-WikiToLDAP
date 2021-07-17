@@ -9,7 +9,6 @@
 		"compat/compat": "warn",
 		"no-jquery/no-global-selector": "warn",
 		"no-unused-vars": "warn",
-		"one-var": "warn",
 		"vars-on-top": "warn",
 		"quotes": "warn"
 	}

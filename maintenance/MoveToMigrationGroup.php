@@ -81,7 +81,7 @@ class MoveToMigrationGroup extends Maintenance {
 	/**
 	 * Get an iterator for the users.
 	 */
-	protected function getUsers() :Traversable {
+	protected function getUsers(): Traversable {
 		$dbr = MediaWikiServices::getInstance()
 			 ->getDBLoadBalancer()->getMaintenanceConnectionRef( DB_REPLICA );
 		return new UserArrayFromResult(
@@ -92,7 +92,7 @@ class MoveToMigrationGroup extends Maintenance {
 	/**
 	 * Move the user to the migration group
 	 */
-	protected function moveToMigrationGroup( User $user ) :void {
+	protected function moveToMigrationGroup( User $user ): void {
 		$status = UserStatus::singleton();
 		$esc = chr( 27 );
 		if ( !$status->isWiki( $user ) ) {

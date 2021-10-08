@@ -33,7 +33,7 @@
 	"scripts": {
 		"test": [
 			"parallel-lint . --exclude vendor --exclude node_modules",
-			"phpcs -p -s",
+			"@phpcs",
 			"minus-x check ."
 		],
 		"fix": [
@@ -42,6 +42,7 @@
 		],
 		"phan": [
 			"phan -m text --no-color --no-progress-bar | sed 's, ,:,'"
-		]
+		],
+		"phpcs": "phpcs -sp --cache"
 	}
 }

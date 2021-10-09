@@ -66,6 +66,9 @@
 			"i18n"
 		]
 	},
+	"ExtensionMessagesFiles": {
+		"LegalLoginAlias": "WikiToLDAP.alias.php"
+	},
 	"AutoloadNamespaces": {
 		"MediaWiki\\Extension\\WikiToLDAP\\": "includes/"
 	},

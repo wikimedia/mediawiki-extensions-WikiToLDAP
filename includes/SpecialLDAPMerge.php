@@ -29,7 +29,6 @@ use HTMLForm;
 use MediaWiki\MediaWikiServices;
 use MergeUser;
 use Message;
-use MovePage;
 use Status;
 use Title;
 use User;
@@ -508,6 +507,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 
 		$output = '';
 		$linkRenderer = $this->getLinkRenderer();
+		$movePageFactory = MediaWikiServices::getInstance()->getMovePageFactory();
 		foreach ( $pages as $row ) {
 			$oldPage = Title::makeTitleSafe( $row->page_namespace, $row->page_title );
 			$newPage = Title::makeTitleSafe(
@@ -515,7 +515,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 				preg_replace( '!^[^/]+!', $newusername->getDBkey(), $row->page_title )
 			);
 
-			$movePage = new MovePage( $oldPage, $newPage );
+			$movePage = $movePageFactory->newMovePage( $oldPage, $newPage );
 			$validMoveStatus = $movePage->isValidMove();
 
 			# Do not autodelete or anything, title must not exist

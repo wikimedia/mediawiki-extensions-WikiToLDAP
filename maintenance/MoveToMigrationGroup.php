@@ -21,8 +21,8 @@
 namespace MediaWiki\Extension\WikiToLDAP;
 
 use Maintenance;
+use MediaWiki\Extension\Renameuser\RenameuserSQL;
 use MediaWiki\MediaWikiServices;
-use RenameuserSQL;
 use Traversable;
 use User;
 use UserArrayFromResult;

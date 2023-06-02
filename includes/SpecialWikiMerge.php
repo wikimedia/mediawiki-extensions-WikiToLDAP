@@ -216,7 +216,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 			"message" => [
 				"type" => "info",
 				"rawrow" => true,
-				"default" => new Message( $this->getMessagePrefix() . "-introduction" )
+				"default" => new Message( "wikitoldap-introduction" )
 			]
 		];
 	}
@@ -228,7 +228,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 		$this->submitButton = "next";
 		return [
 			'username' => [
-				'label-message' => $this->getMessagePrefix() . '-select-account',
+				'label-message' => 'wikitoldap-select-account',
 				'size' => 30,
 				'type' => 'text',
 				'autofocus' => true,
@@ -237,7 +237,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 				'required' => true
 			],
 			'password' => [
-				'label-message' => new Message( $this->getMessagePrefix() . '-ldap-password' ),
+				'label-message' => new Message( 'wikitoldap-ldap-password' ),
 				'validation-callback' => [ $this, 'validatePassword' ],
 				'type' => 'password',
 				'required' => true
@@ -247,7 +247,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 
 	public function validateUsername( ?string $username, array $data ) {
 		if ( empty( $username ) ) {
-			return new Message( $this->getMessagePrefix() . "-empty-username" );
+			return new Message( "wikitoldap-empty-username" );
 		}
 
 		return true;
@@ -256,12 +256,12 @@ class SpecialWikiMerge extends FormSpecialPage {
 	public function validatePassword( ?string $password, array $data ) {
 		$username = $data['username'];
 		if ( empty( $password ) ) {
-			return new Message( $this->getMessagePrefix() . "-empty-password" );
+			return new Message( "wikitoldap-empty-password" );
 		}
 
 		$ldapClient = ClientFactory::getInstance()->getForDomain( $this->getDomain() );
 		if ( !$ldapClient->canBindAs( $username, $password ) ) {
-			return new Message( $this->getMessagePrefix() . "-invalid-password" );
+			return new Message( "wikitoldap-invalid-password" );
 		}
 		$this->setSession( "authenticated", ConvertibleTimestamp::now() );
 
@@ -272,7 +272,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 		$domain = DomainConfigFactory::getInstance()->getConfiguredDomains();
 
 		if ( count( $domain ) !== 1 ) {
-			throw new MWException( $this->getMessagePrefix() . "-only-one-domain" );
+			throw new MWException( "wikitoldap-only-one-domain" );
 		}
 		return $domain[0];
 	}
@@ -284,15 +284,15 @@ class SpecialWikiMerge extends FormSpecialPage {
 	}
 
 	protected function getSession( string $key ): ?string {
-		return $this->session->get( $this->getMessagePrefix() . $key );
+		return $this->session->get( 'wikitoldap' . $key );
 	}
 
 	protected function setSession( string $key, string $value ): void {
-		$this->session->set( $this->getMessagePrefix() . $key, $value );
+		$this->session->set( 'wikitoldap' . $key, $value );
 	}
 
 	protected function clearSession(): void {
-		$prefix = $this->getMessagePrefix();
+		$prefix = 'wikitoldap';
 		$prefixLen = mb_strlen( $prefix );
 
 		foreach ( $this->session as $key => $value ) {
@@ -322,9 +322,9 @@ class SpecialWikiMerge extends FormSpecialPage {
 			$status = UserStatus::singleton();
 			$status->setNotInProgress( $ldapUser );
 			$status->setNotWiki( $ldapUser );
-			$this->submitButton = $this->getMessagePrefix() . "-return";
+			$this->submitButton = "wikitoldap-return";
 
-			$msg = new Message( $this->getMessagePrefix() . "-merge-not-needed" );
+			$msg = new Message( "wikitoldap-merge-not-needed" );
 			return [
 				'message' => [
 					"type" => "info",
@@ -339,7 +339,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 		}
 
 		$msg = new Message(
-			$this->getMessagePrefix() . "-confirm-wiki-merge", [ $this->getUser(), $username ]
+			"wikitoldap-confirm-wiki-merge", [ $this->getUser(), $username ]
 		);
 		return [
 			"message" => [
@@ -355,7 +355,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 	}
 
 	public function merged(): array {
-		$this->submitButton = $this->getMessagePrefix() . "-continue";
+		$this->submitButton = "wikitoldap-continue";
 
 		$username = $this->getSession( "username" );
 		$authenticated = $this->getSession( "authenticated" );
@@ -385,7 +385,7 @@ class SpecialWikiMerge extends FormSpecialPage {
 		$status = new UserStatus();
 		$status->setMerged( $ldapUser );
 
-		$msg = new Message( $this->getMessagePrefix() . "-merge-done" );
+		$msg = new Message( "wikitoldap-merge-done" );
 		return [
 			"message" => [
 				"type" => "info",

@@ -227,7 +227,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 				"default" => new Message( "wikitoldap-ldap-introduction" )
 			],
 			"cancel" => [
-				"class" => "htmlbuttonfield",
+				"class" => "HTMLButtonField",
 				"id" => "wikitoldap-ldap-cancel",
 				"buttonlabel-message" => "wikitoldap-ldap-cancel",
 				"formnovalidate" => true

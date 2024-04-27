@@ -108,7 +108,7 @@ class MoveToMigrationGroup extends Maintenance {
 				if ( mb_substr( $oldname, 0, $this->prefixLen ) !== $this->prefix ) {
 					$renamed = $this->prefix . $oldname;
 					$this->output( "Renaming user '$oldname' to '$renamed'... {$esc}[K" );
-					if ( $this->renameThisUser( $user,  $renamed ) ) {
+					if ( $this->renameThisUser( $user, $renamed ) ) {
 						$this->output( "done\r" );
 					} else {
 						$this->output( "error\n" );

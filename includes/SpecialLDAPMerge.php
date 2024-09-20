@@ -25,6 +25,7 @@ namespace MediaWiki\Extension\WikiToLDAP;
 use Exception;
 use FormSpecialPage;
 use Html;
+use HTMLButtonField;
 use HTMLForm;
 use MediaWiki\MediaWikiServices;
 use MergeUser;
@@ -227,7 +228,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 				"default" => new Message( "wikitoldap-ldap-introduction" )
 			],
 			"cancel" => [
-				"class" => "HTMLButtonField",
+				"class" => HTMLButtonField::class,
 				"id" => "wikitoldap-ldap-cancel",
 				"buttonlabel-message" => "wikitoldap-ldap-cancel",
 				"formnovalidate" => true

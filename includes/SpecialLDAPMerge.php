@@ -334,7 +334,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 		$passwordFactory = $services->getPasswordFactory();
 
 		$dbr = $services->getDBLoadBalancer()->getConnection( DB_REPLICA );
-		$row = $dbr->selectRow( 'user', 'user_password', [ 'user_name' => $user->getName() ] );
+		$row = $dbr->selectRow( 'user', 'user_password', [ 'user_name' => $user->getName() ], __METHOD__ );
 		$passwordInDB = $passwordFactory->newFromCiphertext( $row->user_password );
 
 		return $passwordInDB->verify( $password ) ? $user : null;

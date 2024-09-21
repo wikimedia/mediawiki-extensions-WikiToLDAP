@@ -489,7 +489,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 	 */
 	protected function moveUserPages( Title $oldusername, Title $newusername ): string {
 		// Move any user pages
-		$dbr = wfGetDB( DB_REPLICA );
+		$dbr = MediaWikiServices::getInstance()->getDBLoadBalancer()->getConnection( DB_REPLICA );
 
 		$pages = $dbr->select(
 			'page',

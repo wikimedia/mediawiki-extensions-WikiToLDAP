@@ -1,5 +1,5 @@
-$( '#wikitoldap-ldap-cancel' ).on( 'click', function () {
-	var param = new URLSearchParams( window.location.search ),
+$( '#wikitoldap-ldap-cancel' ).on( 'click', () => {
+	let param = new URLSearchParams( window.location.search ),
 		returnTo = param.get( 'returnto' ),
 		url = mw.util.getUrl( 'Main Page' );
 
@@ -7,11 +7,11 @@ $( '#wikitoldap-ldap-cancel' ).on( 'click', function () {
 		url = mw.util.getUrl( returnTo );
 	}
 
-	var params = {
+	const params = {
 			action: 'wikitoldapoptout'
 		},
 		api = new mw.Api();
-	api.post( params ).done( function ( data ) {
+	api.post( params ).done( ( data ) => {
 		window.location = url;
 	} );
 } );

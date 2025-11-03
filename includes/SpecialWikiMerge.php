@@ -24,15 +24,15 @@ namespace MediaWiki\Extension\WikiToLDAP;
 
 use Exception;
 use FormSpecialPage;
-use Html;
 use HTMLForm;
 use MediaWiki\Extension\LDAPProvider\ClientFactory;
 use MediaWiki\Extension\LDAPProvider\DomainConfigFactory;
+use MediaWiki\Html\Html;
+use MediaWiki\Title\Title;
 use MergeUser;
 use Message;
 use MWException;
 use Status;
-use Title;
 use User;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 

@@ -23,8 +23,8 @@ namespace MediaWiki\Extension\WikiToLDAP;
 
 use ManualLogEntry;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use RequestContext;
-use Title;
 use User;
 
 class Hook {

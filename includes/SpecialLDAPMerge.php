@@ -24,14 +24,14 @@ namespace MediaWiki\Extension\WikiToLDAP;
 
 use Exception;
 use FormSpecialPage;
-use Html;
 use HTMLButtonField;
 use HTMLForm;
+use MediaWiki\Html\Html;
 use MediaWiki\MediaWikiServices;
+use MediaWiki\Title\Title;
 use MergeUser;
 use Message;
 use Status;
-use Title;
 use User;
 use Wikimedia\Timestamp\ConvertibleTimestamp;
 
@@ -474,7 +474,7 @@ class SpecialLDAPMerge extends FormSpecialPage {
 				$this->getUser()->getUserPage()
 			);
 			if ( $ret !== '' ) {
-				$out->addHTML( HTML::rawElement( 'ul', [], $ret ) );
+				$out->addHTML( Html::rawElement( 'ul', [], $ret ) );
 			}
 
 		}

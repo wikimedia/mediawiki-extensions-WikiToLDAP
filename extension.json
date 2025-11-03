@@ -43,7 +43,7 @@
 		}
 	},
 	"requires": {
-		"MediaWiki": ">= 1.35.0",
+		"MediaWiki": ">= 1.40.0",
 		"extensions": {
 			"LDAPAuthentication2": ">= 1.0.1"
 		}

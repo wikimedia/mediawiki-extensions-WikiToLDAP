@@ -19,7 +19,7 @@
  */
 namespace MediaWiki\Extension\WikiToLDAP;
 
-use GlobalVarConfig;
+use MediaWiki\Config\GlobalVarConfig;
 
 class Config extends GlobalVarConfig {
 

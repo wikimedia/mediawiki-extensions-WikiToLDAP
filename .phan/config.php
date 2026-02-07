@@ -6,7 +6,6 @@ $dependencies = [
 	'../../extensions/LDAPAuthentication2',
 	'../../extensions/LDAPProvider',
 	'../../extensions/PluggableAuth',
-	'../../extensions/Renameuser',
 	'../../extensions/UserMerge',
 ];
 
